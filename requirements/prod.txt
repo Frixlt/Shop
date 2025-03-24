@@ -1,0 +1,4 @@
+Django==5.1.5
+python-decouple==3.8
+sorl-thumbnail==12.11
+# PyJWT==2.9.0 #/apps/users/tokens
