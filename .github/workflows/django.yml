@@ -9,46 +9,74 @@ on:
 jobs:
   codestyle-flake8:
     runs-on: ubuntu-latest
-    container: python:3.12
     steps:
       - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.6.9"  # Фиксируем версию UV для стабильности
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"  # Указываем версию Python явно
       - name: Install dependencies
-        run: pip install -r requirements/test.txt
+        run: uv pip install --system -r requirements/test.txt
       - name: Run flake8
         run: flake8 --verbose
 
   codestyle-black:
     runs-on: ubuntu-latest
-    container: python:3.12
     steps:
       - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.6.9"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Install black
-        run: pip install black
+        run: uv pip install --system black
       - name: Run black
         run: black --check --verbose -- .
 
   test-django:
     runs-on: ubuntu-latest
-    container: python:3.12
     steps:
       - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.6.9"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Install dependencies
-        run: pip install -r requirements/test.txt
+        run: uv pip install --system -r requirements/test.txt
       - name: Run Django tests
-        working-directory: ./lyceum
+        working-directory: ./store
         run: |
           python3 manage.py migrate
           python3 manage.py test
 
   coverage:
     runs-on: ubuntu-latest
-    container: python:3.12
     steps:
       - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.6.9"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Install dependencies
-        run: pip install -r requirements/test.txt
+        run: uv pip install --system -r requirements/test.txt
       - name: Run coverage
-        working-directory: ./lyceum
+        working-directory: ./store
         run: |
           python3 manage.py migrate
           coverage run manage.py test
