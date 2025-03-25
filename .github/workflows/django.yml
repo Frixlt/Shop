@@ -1,0 +1,55 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  codestyle-flake8:
+    runs-on: ubuntu-latest
+    container: python:3.12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: pip install -r requirements/test.txt
+      - name: Run flake8
+        run: flake8 --verbose
+
+  codestyle-black:
+    runs-on: ubuntu-latest
+    container: python:3.12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install black
+        run: pip install black
+      - name: Run black
+        run: black --check --verbose -- .
+
+  test-django:
+    runs-on: ubuntu-latest
+    container: python:3.12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: pip install -r requirements/test.txt
+      - name: Run Django tests
+        working-directory: ./lyceum
+        run: |
+          python3 manage.py migrate
+          python3 manage.py test
+
+  coverage:
+    runs-on: ubuntu-latest
+    container: python:3.12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: pip install -r requirements/test.txt
+      - name: Run coverage
+        working-directory: ./lyceum
+        run: |
+          python3 manage.py migrate
+          coverage run manage.py test
+          coverage report
