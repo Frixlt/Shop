@@ -1,6 +1,7 @@
 import functools
 
 import django.apps
+from django.utils.translation import gettext_lazy as _
 
 __all__ = ["LazyModelLoader"]
 
@@ -13,7 +14,10 @@ class AppModelLoader:
         model = django.apps.apps.get_model(self.app_label, model_name)
         if model is None:
             raise AttributeError(
-                f"The model '{model_name}' was not found in the application '{self.app_label}'.",
+                _("The model '{model_name}' was not found in the application '{app_label}'.").format(
+                    model_name=model_name,
+                    app_label=self.app_label,
+                ),
             )
 
         return model
@@ -36,4 +40,4 @@ class LazyModelLoader:
         if app_label in self._apps:
             return self._apps[app_label]
 
-        raise AttributeError(f"The application '{app_label}' was not found.")
+        raise AttributeError(_("The application '{app_label}' was not found.").format(app_label=app_label))
