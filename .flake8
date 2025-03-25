@@ -2,9 +2,14 @@
 max-line-length = 120
 import-order-style = google
 application_import_names = 
+    apps.about, 
+    apps.catalog, 
+    apps.core, 
+    apps.homepage, 
+    apps.users,
     store,
 exclude = 
-    venv, 
+    .venv, 
     */migrations/
 max-expression-complexity = 10
 inline-quotes = "
