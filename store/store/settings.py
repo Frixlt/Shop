@@ -31,6 +31,7 @@ ALLOWED_HOSTS = decouple.config(
 
 INSTALLED_APPS = [
     # Custom applications
+    "apps.catalog.apps.CatalogConfig",
     "apps.core.apps.CoreConfig",
     "apps.users.apps.UsersConfig",
     # Native Django applications # noqa: CM001
