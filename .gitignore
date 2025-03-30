@@ -245,3 +245,6 @@ send_mail
 */media/
 EnvUpdate.ps1
 copy-.py
+uv.lock
+package-lock.json
+store/static_dev/bootstrap
