@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="1000" height="1000"><style>
+    #light-icon {
+      display: inline;
+    }
+    #dark-icon {
+      display: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      #light-icon {
+        display: none;
+      }
+      #dark-icon {
+        display: inline;
+      }
+    }
+  </style><g id="light-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="1000" height="1000"><g><g transform="matrix(14.285714285714286,0,0,14.285714285714286,0,0)"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="70" height="70"><svg width="70" height="70" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path class="logo-path-1" fill="#2E7D32" d="M57.9899 0L52.1895 5.80043V52.1893L57.9899 57.9898C74.0033 41.9765 74.0033 16.0134 57.9899 0Z"></path>
+  <path class="logo-path-2" fill="#A8D5BA" d="M0 57.9899C16.0134 74.0033 41.9765 74.0033 57.9899 57.9899L52.1895 52.1895L5.8007 52.1893L0 57.9899Z"></path>
+  <path class="logo-path-3" fill="#FBC02D" d="M5.80078 52.1893C12.2056 58.5943 20.6004 61.7968 28.9951 61.7968L34.7955 55.9964L28.9951 28.995L5.80078 52.1893Z"></path>
+  <path class="logo-path-4" fill="#C8E6C9" d="M28.9951 28.9949L55.9965 34.7953L61.7971 28.9949C61.7971 20.6002 58.5946 12.2054 52.1896 5.80042L28.9951 28.9949Z"></path>
+  <path class="logo-path-5" fill="#FBC02D" d="M52.1894 52.1893C58.5944 45.7843 61.7969 37.3897 61.7969 28.9949H28.9951L37.6921 43.4924L52.1894 52.1893Z"></path>
+  <path class="logo-path-6" fill="#ffffff" d="M28.9951 61.7968C37.3899 61.7968 45.7846 58.5943 52.1896 52.1893L28.9951 28.9949V61.7968Z"></path>
+</svg></svg></g></g></svg></g><g id="dark-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="1000" height="1000"><g><g transform="matrix(14.285714285714286,0,0,14.285714285714286,0,0)"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="70" height="70"><svg width="70" height="70" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path class="logo-path-1" fill="#4CAF50" d="M57.9899 0L52.1895 5.80043V52.1893L57.9899 57.9898C74.0033 41.9765 74.0033 16.0134 57.9899 0Z"></path>
+  <path class="logo-path-2" fill="#A5D6A7" d="M0 57.9899C16.0134 74.0033 41.9765 74.0033 57.9899 57.9899L52.1895 52.1895L5.8007 52.1893L0 57.9899Z"></path>
+  <path class="logo-path-3" fill="#FFCA28" d="M5.80078 52.1893C12.2056 58.5943 20.6004 61.7968 28.9951 61.7968L34.7955 55.9964L28.9951 28.995L5.80078 52.1893Z"></path>
+  <path class="logo-path-4" fill="#81C784" d="M28.9951 28.9949L55.9965 34.7953L61.7971 28.9949C61.7971 20.6002 58.5946 12.2054 52.1896 5.80042L28.9951 28.9949Z"></path>
+  <path class="logo-path-5" fill="#FFCA28" d="M52.1894 52.1893C58.5944 45.7843 61.7969 37.3897 61.7969 28.9949H28.9951L37.6921 43.4924L52.1894 52.1893Z"></path>
+  <path class="logo-path-6" fill="#B0BEC5" d="M28.9951 61.7968C37.3899 61.7968 45.7846 58.5943 52.1896 52.1893L28.9951 28.9949V61.7968Z"></path>
+</svg></svg></g></g></svg></g></svg>
