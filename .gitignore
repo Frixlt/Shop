@@ -248,3 +248,8 @@ copy-.py
 uv.lock
 package-lock.json
 store/static_dev/bootstrap
+store/static_dev/scripts.js
+store/static_dev/styles.scss
+store/static_dev/styles.css
+store/static_dev/scripts.js.LICENSE.txt
+store/static_dev/scripts.css.LICENSE.txt
