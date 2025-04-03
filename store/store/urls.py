@@ -3,13 +3,20 @@ import django.conf.urls.i18n
 import django.conf.urls.static
 import django.contrib.admin
 import django.urls
+import django.views.i18n
 
 urlpatterns = [
+    django.urls.path("", django.urls.include("apps.catalog.urls")),
     django.urls.path(
         "i18n/",
         django.urls.include(
             django.conf.urls.i18n,
         ),
+    ),
+    django.urls.path(
+        "jsi18n/",
+        django.views.i18n.JavaScriptCatalog.as_view(),
+        name="javascript-catalog",
     ),
     django.urls.path(
         "admin/",

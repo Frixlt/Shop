@@ -1,0 +1,158 @@
+{% load i18n %}
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-column" id="about-module">
+        <h3 class="footer-heading">{% trans "About Us" %}</h3>
+        <ul class="footer-list">
+          <li>
+            <a href="#">{% trans "About Company" %}</a>
+          </li>
+          <li>
+            <a href="#">{% trans "Our Mission" %}</a>
+          </li>
+          <li>
+            <a href="#">{% trans "Blog" %}</a>
+          </li>
+          <li>
+            <a href="#">{% trans "Careers" %}</a>
+          </li>
+          <li>
+            <a href="#">{% trans "Partnership Program" %}</a>
+          </li>
+        </ul>
+      </div>
+      <div class="footer-column" id="customers-module">
+        <h3 class="footer-heading">{% trans "For Customers" %}</h3>
+        <ul class="footer-list">
+          <li>
+            <a href="#">{% trans "Delivery & Payment" %}</a>
+          </li>
+          <li>
+            <a href="#">{% trans "Returns" %}</a>
+          </li>
+          <li>
+            <a href="#">{% trans "Privacy Policy" %}</a>
+          </li>
+          <li>
+            <a href="#">{% trans "Loyalty Program" %}</a>
+          </li>
+          <li>
+            <a href="#">{% trans "FAQ" %}</a>
+          </li>
+        </ul>
+      </div>
+      <div class="footer-column" id="contacts-module">
+        <h3 class="footer-heading">{% trans "Contacts" %}</h3>
+        <ul class="footer-list">
+          <li>
+            <i class="fas fa-map-marker-alt"></i> {% trans "Test St, 10, Test City" %}
+          </li>
+          <li>
+            <i class="fas fa-phone"></i> +7 (000) 000-00-00
+          </li>
+          <li>
+            <i class="fas fa-envelope"></i> info@frixitfresh.com
+          </li>
+          <li>
+            <i class="fas fa-clock"></i> {% trans "Mon-Sun: 9:00 AM - 9:00 PM" %}
+          </li>
+        </ul>
+        <div class="footer-social" id="social-module">
+          <a href="#" class="social-icon" aria-label="VKontakte"><i class="fab fa-vk"></i></a>
+          <a href="#" class="social-icon" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+          <a href="#" class="social-icon" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-icon" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+      <div class="footer-column" id="subscription-module">
+        <h3 class="footer-heading">{% trans "Newsletter" %}</h3>
+        <p class="footer-subheading">{% trans "Subscribe to our newsletter for fresh news, recipes and special offers" %}</p>
+        <form class="footer-form">
+          <input type="email"
+                 class="footer-input"
+                 placeholder="{% trans 'Your email' %}"
+                 aria-label="{% trans 'Email for subscription' %}">
+          <button type="submit"
+                  class="footer-button"
+                  aria-label="{% trans 'Subscribe' %}">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </form>
+        <div class="footer-apps" id="apps-module">
+          <p class="footer-subheading">{% trans "Download our app" %}</p>
+          <div class="app-buttons">
+            <a href="#"
+               class="app-button"
+               aria-label="{% trans 'Download on App Store' %}">
+              <i class="fab fa-apple"></i> {% trans "App Store" %}
+            </a>
+            <a href="#"
+               class="app-button"
+               aria-label="{% trans 'Download on Google Play' %}">
+              <i class="fab fa-google-play"></i> {% trans "Google Play" %}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr class="footer-divider">
+    <div class="footer-middle" id="categories-payment-module">
+      <div class="footer-categories" id="categories-module">
+        <h4 class="footer-subheading">{% trans "Popular Categories" %}</h4>
+        <div class="footer-tags">
+          <a href="#" class="footer-tag">{% trans "Vegetables" %}</a>
+          <a href="#" class="footer-tag">{% trans "Fruits" %}</a>
+          <a href="#" class="footer-tag">{% trans "Dairy" %}</a>
+          <a href="#" class="footer-tag">{% trans "Meat" %}</a>
+          <a href="#" class="footer-tag">{% trans "Fish" %}</a>
+          <a href="#" class="footer-tag">{% trans "Bakery" %}</a>
+          <a href="#" class="footer-tag">{% trans "Beverages" %}</a>
+          <a href="#" class="footer-tag">{% trans "Organic" %}</a>
+        </div>
+      </div>
+      <div class="footer-payment" id="payment-module">
+        <h4 class="footer-subheading">{% trans "Payment Methods" %}</h4>
+        <div class="payment-icons">
+          <i class="fab fa-cc-visa"></i>
+          <i class="fab fa-cc-mastercard"></i>
+          <i class="fab fa-cc-apple-pay"></i>
+          <i class="fab fa-cc-paypal"></i>
+          <i class="fas fa-credit-card"></i>
+        </div>
+      </div>
+    </div>
+    <hr class="footer-divider">
+    <div class="footer-bottom" id="bottom-module">
+      <div class="footer-logo">
+        <div class="logo-icon"></div>
+        <div class="logo-text">Frixit Fresh</div>
+      </div>
+      <div class="footer-links">
+        <a href="#">{% trans "Privacy Policy" %}</a>
+        <span class="footer-separator">|</span>
+        <a href="#">{% trans "Terms of Service" %}</a>
+        <span class="footer-separator">|</span>
+        <a href="#">{% trans "Site Map" %}</a>
+      </div>
+      <form action="{% url 'set_language' %}"
+            method="post"
+            class="language-switcher">
+        {% csrf_token %}
+        <input name="next" type="hidden" value="{{ request.path }}">
+        <select name="language" onchange="this.form.submit()">
+          {% get_current_language as LANGUAGE_CODE %}
+          {% get_available_languages as LANGUAGES %}
+          {% get_language_info_list for LANGUAGES as languages %}
+          {% for language in languages %}
+            <option value="{{ language.code }}"
+                    {% if language.code == LANGUAGE_CODE %}selected{% endif %}>{{ language.name_local }}</option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+    <div class="footer-copyright">
+      © {% now "Y" %} Frixit Fresh. {% trans "All rights reserved. Unauthorized copying prohibited." %}
+    </div>
+  </div>
+</footer>

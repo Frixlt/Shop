@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.forms",
     # External applications
+    "compressor",
     "sorl.thumbnail",
 ]
 
@@ -165,3 +166,17 @@ EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = BASE_DIR / "send_mail"
 
 SPAM_EMAIL = decouple.config("DJANGO_MAIL", default="your_email@ya.ru")
+
+# {VIP} # noqa: E800
+COMPRESS_JS_FILTERS = [
+    "compressor.filters.jsmin.JSMinFilter",
+]
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",  # Было AppStorageFinder
+    "compressor.finders.CompressorFinder",
+]
+COMPRESS_PRECOMPILERS = (("text/x-scss", "django_libsass.SassCompiler"),)
+
+COMPRESS_ENABLED = False  # Для продакшна лучше True
+COMPRESS_OFFLINE = False  # Для разработки можно False
