@@ -1,0 +1,33 @@
+{% load static i18n %}
+<div class="card product-card shadow-sm">
+  <div class="card-img-container">
+    <div class="hover-area"></div>
+    <div class="image-track">
+      {% for image in images %}
+        <div class="image-container">
+          <img src="{{ image }}" alt="{{ title }}" class="card-img-top" />
+        </div>
+      {% endfor %}
+    </div>
+    <div class="carousel-indicators">
+      <div class="carousel-indicator-slider"></div>
+      {% for image in images %}
+        <div class="indicator{% if forloop.first %} active{% endif %}"
+             data-slide="{{ forloop.counter0 }}"></div>
+      {% endfor %}
+    </div>
+    <span class="discount-badge">{{ discount }}</span>
+    <span class="rating-badge">{{ rating }} <i class="bi bi-star-fill"></i></span>
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">{{ title }}</h5>
+    <p class="card-text">{{ text }}</p>
+  </div>
+  <div class="card-footer">
+    <span class="price">{{ price }}</span>
+    <button class="btn btn-cart">
+      <i class="bi bi-cart-plus btn-cart-icon"></i>
+      <i class="bi bi-cart-check-fill btn-cart-icon"></i>
+    </button>
+  </div>
+</div>

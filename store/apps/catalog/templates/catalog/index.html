@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% block content %}
+  <div class="cards-container">
+    {% for item in items %}
+      {% include 'catalog/include/product_card.html' with title=item.data_title text=item.data_text price=item.data_price discount=item.data_discount rating=item.data_rating images=item.data_images %}
+    {% endfor %}
+    <!-- Карточка добавления товара -->
+    {% include 'catalog/include/add_product_card.html' %}
+  </div>
+{% endblock content %}

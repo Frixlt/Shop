@@ -4,7 +4,7 @@ __all__ = ()
 
 
 class ItemsListView(ListView):
-    template_name = "base.html"
+    template_name = "catalog/index.html"
     context_object_name = "items"
 
     def get_queryset(self):

@@ -85,16 +85,7 @@ main {
   overflow-x: hidden;
 }
 
-.cards-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, var(--card-fixed-width));
-  gap: var(--card-gap);
-  justify-content: start;
-  width: 100%;
-  padding: 0;
-}
-
-/* Переменные для тем */
+/* Переменные для тем (все, кроме специфичных для карточек) */
 :root {
   color-scheme: light dark;
   --body-bg: #ffffff;
@@ -103,16 +94,9 @@ main {
   --section-bg: #f1f3f5;
   --nav-bg: #e9ecef;
   --aside-bg: #dee2e6;
-  --border-color: #ced4da;
-  --card-background: #ffffff;
-  --card-text: #343a40;
-  --primary-color: #007bff;
   --accent-color: #198754;
   --accent-hover: #146c43;
   --accent-light: rgba(25, 135, 84, 0.1);
-  --card-fixed-width: 165px;
-  --card-fixed-height: 260px;
-  --card-gap: 10px;
   --header-search-bg: #e9ecef;
   --header-search-text: #495057;
   --header-cart-count-bg: #dc3545;
@@ -142,9 +126,6 @@ main {
   --section-bg: #1e1e1e;
   --nav-bg: #252525;
   --aside-bg: #333333;
-  --border-color: #444444;
-  --card-background: #2a2a2a;
-  --card-text: #e0e0e0;
   --accent-hover: #1eb069;
   --accent-light: rgba(25, 135, 84, 0.2);
   --header-search-bg: #2a2a2a;
@@ -173,9 +154,6 @@ main {
     --section-bg: #1e1e1e;
     --nav-bg: #252525;
     --aside-bg: #333333;
-    --border-color: #444444;
-    --card-background: #2a2a2a;
-    --card-text: #e0e0e0;
     --accent-hover: #1eb069;
     --accent-light: rgba(25, 135, 84, 0.2);
     --header-search-bg: #2a2a2a;
@@ -261,10 +239,6 @@ main {
 
   main {
     padding: 10px;
-  }
-
-  .carousel-indicators {
-    opacity: 1;
   }
 
   .header-actions {
@@ -375,11 +349,6 @@ main {
     font-size: 20px;
   }
 
-  .cards-container {
-    grid-template-columns: repeat(2, var(--card-fixed-width));
-    justify-content: center;
-  }
-
   .footer-logo .logo-icon {
     width: 40px;
     height: 40px;
@@ -429,24 +398,6 @@ main {
 
   .footer-logo .logo-text {
     font-size: 1.1rem;
-  }
-}
-
-@media (max-width: 359px) {
-  .cards-container {
-    grid-template-columns: 1fr;
-    justify-items: center;
-  }
-
-  .product-card,
-  .add-card {
-    width: 90%;
-    height: auto;
-  }
-
-  .card-img-container {
-    height: calc(90vw * 0.9);
-    max-height: 180px;
   }
 }
 
