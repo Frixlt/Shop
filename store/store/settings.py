@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django.forms",
     # External applications
     "compressor",
+    "modeltranslation",
     "sorl.thumbnail",
 ]
 
@@ -144,6 +145,10 @@ USE_L10N = True
 USE_TZ = True
 
 LOCALE_PATHS = [BASE_DIR / "locale/"]
+
+MODELTRANSLATION_DEFAULT_LANGUAGE = "ru"
+
+MODELTRANSLATION_LANGUAGES = ("en", "ru")
 
 
 STATIC_URL = "static/"

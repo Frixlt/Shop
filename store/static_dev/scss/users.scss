@@ -1,0 +1,48 @@
+@import 'modules/forms';
+@import 'modules/select';
+
+section[role="main"] {
+  display: flex; // Use flexbox to control alignment
+  flex-direction: column; // Stack children vertically
+  align-items: center; // Center children horizontally (the main.container)
+  justify-content: center; // Center children vertically (the main.container)
+
+  // Calculate the minimum height required to fill the space below the header.
+  // We estimate the header height. You might need to adjust '92px' if your header's
+  // actual rendered height differs significantly (e.g., due to borders, dynamic content).
+  // A common practice is to use a CSS variable if the header height is dynamic.
+  // Assuming header is roughly 60px (min-height) + 2rem padding (32px) = 92px
+  min-height: calc(100vh - var(--header-effective-height, 92px));
+
+  padding: 2rem 0; // Add some vertical padding for spacing around the form if needed
+  overflow: auto; // Ensure scrolling if content overflows on small screens/heights
+}
+
+// Ensure the container within the section behaves correctly
+section[role="main"]>main.container {
+  width: 100%; // Allow container to span horizontally
+  max-width: 1280px; // Respect the general site max-width
+  // No vertical margin needed as the parent section handles vertical centering
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 15px; // Keep horizontal padding consistent
+  padding-right: 15px;
+  display: flex; // Use flex to easily center the auth-container inside
+  justify-content: center;
+}
+
+// Ensure the auth-container itself doesn't have conflicting margins
+.auth-container {
+  margin-top: 0; // Remove any top/bottom margin if previously set
+  margin-bottom: 0;
+  // Keep the existing max-width, padding, border, etc. from _forms.scss
+}
+
+// On smaller screens where the footer might overlap or cause issues
+@media (max-height: 600px) {
+  section[role="main"] {
+    // Allow natural height instead of forcing viewport height if screen is very short
+    min-height: auto;
+    padding: 3rem 0; // Increase padding slightly
+  }
+}

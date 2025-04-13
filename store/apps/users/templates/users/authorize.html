@@ -1,0 +1,108 @@
+{# --"--\Catalog\store\apps\users\templates\users\authorize.html"-- #}
+{% extends 'base.html' %}
+{% load i18n static compress %}
+{% block title %}
+  {% trans "Authorization" %}
+{% endblock %}
+{% block extra_css %}
+  {% compress css %}
+    <link rel="stylesheet"
+          href="{% static 'scss/users.scss' %}"
+          type="text/x-scss">
+  {% endcompress %}
+{% endblock %}
+{% block content %}
+  <div class="auth-container">
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-form="login-form">{% trans "Login" %}</button>
+      <button class="auth-tab" data-form="register-form">{% trans "Sign Up" %}</button>
+      <div class="tab-indicator"></div>
+    </div>
+    <form id="login-form" class="auth-form active" method="post" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="login-form" value="1">
+      {% if login_form.non_field_errors %}
+        <div class="form-error non-field-errors" style="display: block;">
+          {% for error in login_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+      {{ login_form.email_or_username }}
+      {{ login_form.password }}
+      <div class="form-options">
+        {# Explicitly wrap 'remember me' checkbox if it also uses CheckboxWidget #}
+        <div class="form-check">
+          {{ login_form.remember }} {# Renders the input #}
+          {{ login_form.remember.label_tag }} {# Renders the label #}
+        </div>
+        <a href="{% url 'users:password_reset' %}" class="auth-link">{% trans "Forgot password?" %}</a>
+      </div>
+      {% if login_form.remember.errors %}
+        <div class="form-error field-error"
+             style="display: block;
+                    margin-top: -0.7rem;
+                    margin-bottom: 1rem;
+                    padding-left: calc(1rem + 0.6rem)">{{ login_form.remember.errors }}</div>
+      {% endif %}
+      <button type="submit" class="auth-button">
+        <i class="fas fa-sign-in-alt"></i> {% trans "Login" %}
+      </button>
+      <p class="auth-switch-text">
+        {% trans "Don't have an account?" %}
+        <a href="#" class="auth-link" data-switch-tab="register-form">{% trans "Sign up" %}</a>
+      </p>
+    </form>
+    <form id="register-form"
+          class="auth-form"
+          method="post"
+          novalidate
+          enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="register-form" value="1">
+      {# Display non-field errors first #}
+      {% if register_form.non_field_errors %}
+        <div class="form-error non-field-errors"
+             style="display: block;
+                    margin-bottom: 1rem">
+          {% for error in register_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+      {# Render fields individually #}
+      {{ register_form.username }}
+      {{ register_form.email }}
+      {{ register_form.phone }}
+      {{ register_form.age }}
+      {{ register_form.birth_date }}
+      {{ register_form.country }}
+      {{ register_form.bio }}
+      {{ register_form.gender }}
+      {{ register_form.avatar }}
+      {{ register_form.password }}
+      {{ register_form.confirm_password }}
+      {# --- START: Explicit rendering for 'terms' field --- #}
+      <div class="form-check terms-check">
+        {{ register_form.terms }} {# Renders the <input type="checkbox"> #}
+        {# Render the label using label_tag which includes the HTML from the widget #}
+        {{ register_form.terms.label_tag }}
+      </div>
+      {# Display errors specifically for the 'terms' field, positioned correctly #}
+      {% if register_form.terms.errors %}
+        <div class="form-error field-error" style="display: block;">{{ register_form.terms.errors }}</div>
+      {% endif %}
+      {# --- END: Explicit rendering for 'terms' field --- #}
+      <button type="submit" class="auth-button">
+        <i class="fas fa-user-plus"></i> {% trans "Sign Up" %}
+      </button>
+      <p class="auth-switch-text">
+        {% trans "Already have an account?" %}
+        <a href="#" class="auth-link" data-switch-tab="login-form">{% trans "Login" %}</a>
+      </p>
+    </form>
+  </div>
+{% endblock %}
+{% block extra_js %}
+  <script src="{% static 'js/modules/select.js' %}"></script>
+  <script type="module" src="{% static 'js/users.js' %}"></script>
+{% endblock %}
+{% block show_footer %}
+  {% include 'include/footer.html' %}
+{% endblock %}

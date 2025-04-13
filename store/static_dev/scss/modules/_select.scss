@@ -1,0 +1,392 @@
+// Catalog/store/static_dev/scss/modules/_select.scss
+
+// Переменные темы из твоего проекта (убедись, что путь правильный)
+@import '../variables';
+
+// --- Основной контейнер селекта ---
+.select {
+  position: relative; // Необходимо для позиционирования .select-options
+  width: 100%;
+  user-select: none;
+  font-size: 0.95rem;
+}
+
+// Заголовок селекта (видимая часть)
+.select-header {
+  border: 1px solid var(--border-color);
+  padding: 0.8rem 1rem;
+  padding-left: var(--icon-padding, 2.8rem); // Для иконки
+  cursor: pointer;
+  background: var(--input-bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 6px; // Как у твоих инпутов
+  height: 44px; // Как у твоих инпутов
+  color: var(--text-color);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  position: relative; // Для иконки и стрелки
+}
+
+.select--no-icon .select-header {
+  --icon-padding: 1rem; // Если нет иконки
+}
+
+.select-header:hover {
+  border-color: var(--accent-color);
+}
+
+// Стрелка вниз/вверх
+.select-header::after {
+  content: '\f078'; // fa-chevron-down
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-size: 10px;
+  color: var(--text-color-secondary);
+  transition: transform 0.3s ease, color 0.3s ease;
+  padding: 5px; // Зона клика
+  flex-shrink: 0; // Не сжимать
+}
+
+.select--open .select-header::after {
+  transform: rotate(180deg);
+  color: var(--accent-color);
+}
+
+// Иконка в заголовке (слева)
+.select-header-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-color-secondary);
+  font-size: 1rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+  pointer-events: none; // Чтобы клик проходил на header
+}
+
+.select--open .select-header-icon {
+  color: var(--accent-color);
+  transform: translateY(-50%) scale(1.1); // Небольшое увеличение
+}
+
+// Текст в заголовке
+.select-header-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-grow: 1; // Занимать доступное место
+  margin-right: 0.5rem; // Отступ от стрелки
+}
+
+// Состояние фокуса/открытия для заголовка
+.select--open .select-header,
+.select-header:focus,
+.select-header:focus-within {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--input-focus);
+  outline: none; // Убираем стандартный outline
+}
+
+// Выпадающий список опций
+.select-options {
+  position: absolute;
+  top: calc(100% + 4px); // Отступ от хедера селекта (можно 4-8px)
+  left: 0;
+  width: 100%; // Занимает всю ширину родителя .select
+  border: 1px solid var(--border-color);
+  border-radius: 8px; // Скругление
+  background: var(--card-background);
+  max-height: 260px; // Ограничение высоты
+  overflow-y: auto; // Включение скролла
+  display: none; // Скрыт по умолчанию
+  z-index: 10; // ВАЖНО: Должен быть ВЫШЕ заголовка, но НИЖЕ поднятого родителя .form-field
+  box-shadow: 0 6px 18px var(--box-shadow-color);
+  animation: selectFadeIn 0.2s ease forwards; // Анимация появления
+}
+
+// Показываем список при открытии
+.select--open .select-options {
+  display: block; // Или 'flex', если внутри flex-элементы и нужен flex-контейнер
+}
+
+// Анимация появления списка
+@keyframes selectFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Стилизация скроллбара
+.select-options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.select-options::-webkit-scrollbar-track {
+  background: var(--input-bg);
+  border-radius: 3px;
+}
+
+.select-options::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 3px;
+}
+
+.select-options::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-hover);
+}
+
+// Обертка для поиска
+.select-search-wrapper {
+  position: sticky; // Липкий поиск
+  top: 0;
+  z-index: 1; // Над опциями
+  background: var(--card-background); // Фон чтобы не просвечивало
+  padding: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+// Поле поиска
+.select-search {
+  padding: 0.7rem 1rem 0.7rem 2.5rem; // Отступ для иконки
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  width: 100%;
+  background: var(--input-bg);
+  color: var(--text-color);
+  font-size: 0.9rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  box-sizing: border-box;
+}
+
+.select-search:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--input-focus);
+}
+
+// Иконка поиска
+.select-search-icon {
+  position: absolute;
+  left: 12px + 12px; // padding wrapper + отступ
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-color-secondary);
+  font-size: 0.9rem;
+  pointer-events: none;
+  transition: color 0.3s ease;
+}
+
+.select-search-wrapper:focus-within .select-search-icon {
+  // Меняем цвет при фокусе на input
+  color: var(--accent-color);
+}
+
+// Контейнер для самих опций (чтобы поиск был sticky над ним)
+.select-options-list {
+  // Сюда не нужно особых стилей, он просто содержит .select-option
+}
+
+// Опция в списке
+.select-option {
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 1rem;
+  color: var(--text-color);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+  position: relative;
+}
+
+.select-option:hover {
+  background: var(--input-bg);
+}
+
+.select-option:active {
+  transform: scale(0.99);
+}
+
+// Полоска слева
+.select-option::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background: transparent;
+  transition: background 0.2s ease;
+}
+
+.select-option:hover::after {
+  background: var(--accent-color);
+}
+
+// Выбранная опция
+.select-option--selected {
+  background: var(--input-focus);
+  color: var(--accent-color);
+  font-weight: 500;
+}
+
+.select-option--selected::after {
+  background: var(--accent-color);
+}
+
+// Скрытая опция (при поиске или hideSelected)
+.select-option--hidden {
+  display: none !important;
+}
+
+// Чекбокс/радио кнопка
+.select-check {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-color);
+  position: relative;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+
+.select-check--circle {
+  border-radius: 50%;
+}
+
+.select-check--square {
+  border-radius: 4px;
+}
+
+.select-option:hover .select-check {
+  border-color: var(--accent-color);
+  transform: scale(1.05);
+}
+
+.select-option--selected .select-check {
+  border-color: var(--accent-color);
+  background: var(--accent-color);
+  transform: scale(1.05);
+}
+
+// Галочка внутри
+.select-option--selected .select-check::after {
+  content: '\f00c'; // fa-check
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 10px;
+  animation: checkmark 0.3s ease;
+}
+
+@keyframes checkmark {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+// Сообщение "Ничего не найдено"
+.select-empty {
+  padding: 1.2rem;
+  text-align: center;
+  color: var(--text-color-secondary);
+  font-style: italic;
+}
+
+// --- Стили для счетчика и выбранных "чипсов" ---
+.select-count {
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--input-bg);
+  border-radius: 8px 8px 0 0; // Только верхние углы, если он первый
+}
+
+.select-count-title {
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.select-count-value {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--accent-color);
+  background: rgba(var(--accent-color-rgb), 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.select-selected-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  background: var(--card-background);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.select-selected-item {
+  display: flex;
+  align-items: center;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+  color: var(--text-color);
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px var(--box-shadow-color);
+}
+
+.select-selected-item:hover {
+  border-color: var(--accent-color);
+  box-shadow: 0 2px 4px var(--box-shadow-color);
+}
+
+.select-selected-item-text {
+  margin-right: 0.5rem;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select-selected-item-remove {
+  cursor: pointer;
+  color: var(--text-color-secondary);
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.select-selected-item-remove:hover {
+  color: var(--accent-color);
+  background: rgba(var(--accent-color-rgb), 0.1);
+  transform: rotate(90deg);
+}

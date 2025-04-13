@@ -5,7 +5,11 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frixit Fresh - {% trans "Fresh Products" %}</title>
+    <title>Frixit Fresh -
+      {% block title %}
+        {% trans "Fresh Products" %}
+      {% endblock %}
+    </title>
     <!-- Мета-теги -->
     <meta name="description"
           content="{% trans 'Fresh organic products delivered to your door' %}">
@@ -20,7 +24,10 @@
             href="{% static 'scss/main.scss' %}"
             type="text/x-scss">
     {% endcompress %}
-    <!-- Альтернативные языковые версии (исправленный вариант) -->
+    <!-- Дополнительные стили -->
+    {% block extra_css %}
+    {% endblock extra_css %}
+    <!-- Альтернативные языковые версии -->
     {% get_available_languages as LANGUAGES %}
     {% get_language_info_list for LANGUAGES as languages %}
     {% for language in languages %}
@@ -42,6 +49,17 @@
     <section role="main">
       <main class="container">
         {% block content %}
+          {% block is_error_page %}
+          {% endblock is_error_page %}
+          <div class="error-container">
+            <h2 class="error-title">{% trans "Something went wrong" %}</h2>
+            <p class="error-message">
+              {% trans "It seems we couldn't load this page. Please try again later or contact our support team." %}
+            </p>
+            <a href="mailto:support@frixitfresh.com?subject=Page%20Load%20Error&body=Error%20on%20page:%20{{ request.path|urlencode }}"
+               class="error-button"
+               id="error-contact-button">{% trans "Contact Support" %}</a>
+          </div>
         {% endblock content %}
       </main>
     </section>
@@ -49,25 +67,49 @@
     <aside aria-label="{% trans 'Additional information' %}">
       {% include 'include/aside.html' %}
     </aside>
-    <!-- Подвал -->
-    {% include 'include/footer.html' %}
+    <!-- Подвал (показываем только если не страница ошибки) -->
+    {% block show_footer %}
+      {% include 'include/footer.html' %}
+    {% endblock show_footer %}
     <!-- Отладочные элементы -->
     {% if debug %}
       {% include 'modules/show-grid.html' %}
     {% endif %}
     <!-- Скрипты -->
-    {% comment %} {% compress js %} {% endcomment %}
-    <script src="{% url 'javascript-catalog' %}"></script>
+    <script src="{% url 'jsi18n' %}"></script>
     <script type="module" src="{% static 'js/main.js' %}"></script>
+    <!-- Дополнительные скрипты -->
+    {% block extra_js %}
+    {% endblock extra_js %}
     <script type="text/javascript">
-    // Передаем язык в JS глобально
+      // Передаем язык в JS глобально
       window.DJANGO_LANGUAGE_CODE = "{{ LANGUAGE_CODE }}";
+      // Отправка уведомления на сервер при загрузке страницы с ошибкой
+      document.addEventListener('DOMContentLoaded', () => {
+        const errorContainer = document.querySelector('.error-container');
+        if (errorContainer) {
+          fetch('/report-error/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({
+              url: window.location.href,
+              path: '{{ request.path }}',
+              timestamp: new Date().toISOString(),
+            }),
+          })
+          .then(response => {
+            if (!response.ok) console.error('Failed to send error report');
+          })
+          .catch(error => console.error('Error sending report:', error));
+        }
+      });
     </script>
-    {% comment %} {% endcompress %} {% endcomment %}
-    <!-- Аналитика (может отличаться для разных языков) -->
+    <!-- Аналитика -->
     {% if not debug %}
       <script>
-        // Пример: Google Analytics с учетом языка
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
