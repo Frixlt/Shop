@@ -42,6 +42,17 @@
     <section role="main">
       <main class="container">
         {% block content %}
+          {% block is_error_page %}
+          {% endblock is_error_page %}
+          <div class="error-container">
+            <h2 class="error-title">{% trans "Something went wrong" %}</h2>
+            <p class="error-message">
+              {% trans "It seems we couldn't load this page. Please try again later or contact our support team." %}
+            </p>
+            <a href="mailto:support@frixitfresh.com?subject=Page%20Load%20Error&body=Error%20on%20page:%20{{ request.path|urlencode }}"
+               class="error-button"
+               id="error-contact-button">{% trans "Contact Support" %}</a>
+          </div>
         {% endblock content %}
       </main>
     </section>
@@ -57,7 +68,7 @@
     {% endif %}
     <!-- Скрипты -->
     {% comment %} {% compress js %} {% endcomment %}
-    <script src="{% url 'javascript-catalog' %}"></script>
+    <script src="{% url 'jsi18n' %}"></script>
     <script type="module" src="{% static 'js/main.js' %}"></script>
     <script type="text/javascript">
     // Передаем язык в JS глобально
