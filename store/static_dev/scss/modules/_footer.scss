@@ -17,7 +17,7 @@
 }
 
 .footer-heading {
-  font-family: 'Lora', serif;
+  font-family: $font-family-heading;
   font-size: 1.2rem;
   font-weight: 700;
   margin: 0 0 1.5rem;
@@ -109,7 +109,6 @@
   transform: scale(1.2);
 }
 
-/* Социальные сети */
 .footer-social {
   display: flex;
   gap: 0.8rem;
@@ -147,7 +146,7 @@
 }
 
 .social-icon:hover {
-  color: #fff;
+  color: $white;
   transform: translateY(-3px);
   box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3);
 }
@@ -156,7 +155,6 @@
   transform: scale(1);
 }
 
-/* Форма подписки */
 .footer-form {
   display: flex;
   align-items: stretch;
@@ -171,7 +169,7 @@
   border-radius: 6px;
   background-color: var(--input-bg);
   color: var(--text-color);
-  font-family: 'Roboto', sans-serif;
+  font-family: $font-family-base;
   font-size: 0.95rem;
   transition: all var(--transition-speed) ease;
   height: 44px;
@@ -189,7 +187,7 @@
   right: 4px;
   top: 4px;
   background-color: var(--accent-color);
-  color: white;
+  color: $white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -207,7 +205,6 @@
   transform: translateX(-2px);
 }
 
-/* Приложения */
 .footer-apps {
   margin-top: 1.8rem;
 }
@@ -249,7 +246,6 @@
   transform: scale(1.2);
 }
 
-/* Теги и категории */
 .footer-middle {
   display: flex;
   flex-wrap: wrap;
@@ -306,7 +302,6 @@
   transform: scale(1.1);
 }
 
-/* Нижняя часть футера */
 .footer-bottom {
   display: flex;
   flex-wrap: wrap;
@@ -341,7 +336,7 @@
 }
 
 .footer-logo .logo-text {
-  font-family: 'Lora', serif;
+  font-family: $font-family-heading;
   font-size: 1.3rem;
   font-weight: 700;
   color: var(--text-color);
@@ -390,7 +385,7 @@
   border: 1px solid transparent;
   padding: 0.6rem 1.2rem;
   border-radius: 6px;
-  font-family: 'Roboto', sans-serif;
+  font-family: $font-family-base;
   font-size: 0.9rem;
   cursor: pointer;
   transition: all var(--transition-speed) ease;
