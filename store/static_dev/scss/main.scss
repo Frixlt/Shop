@@ -1,17 +1,18 @@
+// Общие переменные и базовые стили
 @import 'variables';
+@import 'modules/styles'; // Базовые стили body, grid, container
+@import 'modules/fonts'; // Подключение шрифтов
 
-// Импорт компонентов
+// Общие компоненты
 @import 'modules/header';
 @import 'modules/footer';
-@import 'modules/styles';
 @import 'modules/tooltip';
-@import 'modules/fonts';
-@import 'modules/card';
-@import 'modules/error';
+@import 'modules/card'; // Стили карточек товара
+@import 'modules/error'; // Стили для страниц ошибок (404, 500 и т.д.)
+@import 'modules/forms'; // Общие стили для форм (контейнер, кнопка, общие ошибки/успех)
 
-//{WIP}
+// {WIP} Утилиты
 @import 'modules/show-grid';
 
-// widgets
-// @import 'widgets/auth_input';
-// @import 'modules/forms';
+// Виджеты (только если они используются глобально)
+// @import 'widgets/some_global_widget';

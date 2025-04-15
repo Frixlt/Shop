@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load i18n static compress %}
+{% block title %}
+  {% trans "Authorization Test" %}
+{% endblock title %}
+{% block css %}
+  {% compress css %}
+    <link rel="stylesheet"
+          href="{% static 'scss/users.scss' %}"
+          type="text/x-scss">
+  {% endcompress %}
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+{% endblock css %}
+{% block content %}
+  <div class="container">
+    <div class="auth-container">
+      <h2 style="text-align: center; margin-bottom: 1.5rem;">Тест формы</h2>
+      <form method="post"
+            action="{% url 'users:authorize' %}"
+            novalidate
+            id="test-auth-form">
+        {% csrf_token %}
+        {% for field in form %}{{ field }}{% endfor %}
+        <button type="submit" class="auth-button">Отправить</button>
+        <div id="form-generic-error"
+             class="form-error"
+             style="text-align: center;
+                    margin-top: 1rem;
+                    display: none"></div>
+      </form>
+      <div class="form-success" id="form-success" style="display: none;"></div>
+    </div>
+  </div>
+{% endblock content %}
+{% block show_footer %}
+  {% include 'include/footer.html' %}
+{% endblock show_footer %}
+{% block extra_js %}
+  <script type="module" src="{% static 'js/widgets/init.js' %}"></script>
+{% endblock extra_js %}

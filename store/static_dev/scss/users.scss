@@ -1,0 +1,21 @@
+// Зависимости для страницы users (авторизация и т.д.)
+
+// Общие переменные и базовые стили
+@import 'variables';
+@import 'modules/styles'; // Базовые стили body, grid, container
+@import 'modules/fonts'; // Подключение шрифтов
+
+// Общие компоненты, используемые на странице users
+@import 'modules/header';
+@import 'modules/footer';
+@import 'modules/tooltip';
+@import 'modules/error'; // Могут быть ошибки
+
+// Модули, специфичные для users или имеющие особое значение здесь
+@import 'modules/forms'; // Общие стили для форм
+
+// Виджеты, используемые на странице users
+@import 'widgets/text_input'; // Стили для кастомного поля ввода
+
+// {WIP} Утилиты
+@import 'modules/show-grid';

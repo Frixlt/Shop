@@ -1,11 +1,10 @@
-// Общие настройки
 $transition-speed: 0.3s;
 $border-radius: 0.5rem;
 $box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 $container-max-width: 1280px;
 $font-family-base: 'Roboto', sans-serif;
-$font-family-heading: 'Lora', serif;
-$font-family-button: 'Poppins', sans-serif;
+$font-family-heading: 'Lora', serif; // Note: HTML uses Poppins for some headings/buttons
+$font-family-button: 'Poppins', sans-serif; // Kept Poppins
 
 // Цвета
 $white: #ffffff;
@@ -14,11 +13,11 @@ $gray-light: #e9ecef;
 $gray-medium: #ced4da;
 $gray-dark: #666666;
 $red: #dc3545;
-$blue: #007bff;
-$green: #198754;
+$blue: #007bff; // Primary color (e.g., for links)
+$green: #198754; // Accent color (buttons, highlights)
 $yellow: #fbc02d;
 
-// Цвета для логотипа
+// Цвета для логотипа (Unchanged)
 $logo-path-1-light: #2e7d32;
 $logo-path-2-light: #a8d5ba;
 $logo-path-3-light: #fbc02d;
@@ -32,7 +31,7 @@ $logo-path-4-dark: #81c784;
 $logo-path-5-dark: #ffca28;
 $logo-path-6-dark: #b0bec5;
 
-// Размеры карточек
+// Размеры карточек (Unchanged)
 $card-fixed-width: 165px;
 $card-fixed-height: 260px;
 $card-gap: 10px;
@@ -43,20 +42,21 @@ $card-gap: 10px;
   // Основные цвета
   --body-bg: #{$white};
   --text-color: #333333;
-  --text-color-secondary: #{$gray-dark};
+  --text-color-secondary: #{$gray-dark}; // Used for labels, placeholders
   --section-bg: #f1f3f5;
   --nav-bg: #{$gray-light};
   --aside-bg: #dee2e6;
   --footer-bg: #{$white};
-  --border-color: #{$gray-medium};
-  --card-background: #{$white};
+  --border-color: #{$gray-medium}; // Default border
+  --card-background: #{$white}; // Form container background
   --card-text: #343a40;
   // Акценты
-  --primary-color: #{$blue};
-  --accent-color: #{$green};
-  --accent-hover: #146c43;
+  --primary-color: #{$blue}; // Used for auth links
+  --accent-color: #{$green}; // Main accent (buttons, focus, active tab)
+  --accent-hover: #146c43; // Button hover
   --accent-light: rgba(25, 135, 84, 0.1);
-  --error-color: #{$red};
+  --accent-color-rgb: 25, 135, 84; // NEW: RGB for rgba usage
+  --error-color: #{$red}; // Error messages, borders
   // Элементы интерфейса
   --header-search-bg: #{$gray-light};
   --header-search-text: #495057;
@@ -65,17 +65,17 @@ $card-gap: 10px;
   --footer-divider: rgba(0, 0, 0, 0.1);
   --footer-tag-bg: #{$gray-light};
   --footer-social-bg: #{$gray-light};
-  --input-bg: #f1f3f5;
-  --input-focus: rgba(25, 135, 84, 0.25);
-  --box-shadow-color: rgba(0, 0, 0, 0.05);
-  // Логотип
+  --input-bg: #f1f3f5; // Input background
+  --input-focus: rgba(var(--accent-color-rgb), 0.25); // Focus shadow
+  --box-shadow-color: rgba(0, 0, 0, 0.05); // General shadows
+  // Логотип (Unchanged)
   --logo-path-1: #{$logo-path-1-light};
   --logo-path-2: #{$logo-path-2-light};
   --logo-path-3: #{$logo-path-3-light};
   --logo-path-4: #{$logo-path-4-light};
   --logo-path-5: #{$logo-path-5-light};
   --logo-path-6: #{$logo-path-6-light};
-  // SVG логотипа
+  // SVG логотипа (Unchanged)
   --logo-svg: url('data:image/svg+xml;charset=utf-8,<svg width="70" height="70" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="logo-path-1" fill="%232E7D32" d="M57.9899 0L52.1895 5.80043V52.1893L57.9899 57.9898C74.0033 41.9765 74.0033 16.0134 57.9899 0Z"/><path class="logo-path-2" fill="%23A8D5BA" d="M0 57.9899C16.0134 74.0033 41.9765 74.0033 57.9899 57.9899L52.1895 52.1895L5.8007 52.1893L0 57.9899Z"/><path class="logo-path-3" fill="%23FBC02D" d="M5.80078 52.1893C12.2056 58.5943 20.6004 61.7968 28.9951 61.7968L34.7955 55.9964L28.9951 28.995L5.80078 52.1893Z"/><path class="logo-path-4" fill="%23C8E6C9" d="M28.9951 28.9949L55.9965 34.7953L61.7971 28.9949C61.7971 20.6002 58.5946 12.2054 52.1896 5.80042L28.9951 28.9949Z"/><path class="logo-path-5" fill="%23FBC02D" d="M52.1894 52.1893C58.5944 45.7843 61.7969 37.3897 61.7969 28.9949H28.9951L37.6921 43.4924L52.1894 52.1893Z"/><path class="logo-path-6" fill="%23ffffff" d="M28.9951 61.7968C37.3899 61.7968 45.7846 58.5943 52.1896 52.1893L28.9951 28.9949V61.7968Z"/></svg>');
   // Дополнительно
   --transition-speed: #{$transition-speed};
@@ -91,25 +91,27 @@ $card-gap: 10px;
   --body-bg: #121212;
   --text-color: #e0e0e0;
   --text-color-secondary: #aaaaaa;
-  --section-bg: #1e1e1e;
+  --section-bg: #121212; // Updated from #1e1e1e to match example
   --nav-bg: #252525;
   --aside-bg: #333333;
   --footer-bg: #1a1a1a;
   --border-color: #444444;
-  --card-background: #2a2a2a;
+  --card-background: #1e1e1e; // Form container background
   --card-text: #e0e0e0;
   // Акценты
   --accent-hover: #1eb069;
   --accent-light: rgba(25, 135, 84, 0.2);
+  // --accent-color-rgb remains 25, 135, 84
+  // Элементы интерфейса
   --header-search-bg: #2a2a2a;
   --header-search-text: #e0e0e0;
   --footer-divider: rgba(255, 255, 255, 0.1);
   --footer-tag-bg: #2a2a2a;
   --footer-social-bg: #2a2a2a;
   --input-bg: #2a2a2a;
-  --input-focus: rgba(25, 135, 84, 0.4);
-  --box-shadow-color: rgba(0, 0, 0, 0.2);
-  // Логотип
+  --input-focus: rgba(var(--accent-color-rgb), 0.4); // Adjusted alpha for dark theme
+  --box-shadow-color: rgba(0, 0, 0, 0.2); // General shadows
+  // Логотип (Unchanged)
   --logo-path-1: #{$logo-path-1-dark};
   --logo-path-2: #{$logo-path-2-dark};
   --logo-path-3: #{$logo-path-3-dark};
@@ -126,25 +128,27 @@ $card-gap: 10px;
     --body-bg: #121212;
     --text-color: #e0e0e0;
     --text-color-secondary: #aaaaaa;
-    --section-bg: #1e1e1e;
+    --section-bg: #121212; // Updated from #1e1e1e
     --nav-bg: #252525;
     --aside-bg: #333333;
     --footer-bg: #1a1a1a;
     --border-color: #444444;
-    --card-background: #2a2a2a;
+    --card-background: #1e1e1e;
     --card-text: #e0e0e0;
     // Акценты
     --accent-hover: #1eb069;
     --accent-light: rgba(25, 135, 84, 0.2);
+    // --accent-color-rgb remains 25, 135, 84
+    // Элементы интерфейса
     --header-search-bg: #2a2a2a;
     --header-search-text: #e0e0e0;
     --footer-divider: rgba(255, 255, 255, 0.1);
     --footer-tag-bg: #2a2a2a;
     --footer-social-bg: #2a2a2a;
     --input-bg: #2a2a2a;
-    --input-focus: rgba(25, 135, 84, 0.4);
+    --input-focus: rgba(var(--accent-color-rgb), 0.4);
     --box-shadow-color: rgba(0, 0, 0, 0.2);
-    // Логотип
+    // Логотип (Unchanged)
     --logo-path-1: #{$logo-path-1-dark};
     --logo-path-2: #{$logo-path-2-dark};
     --logo-path-3: #{$logo-path-3-dark};

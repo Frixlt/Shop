@@ -5,8 +5,22 @@ import django.contrib.admin
 import django.urls
 import django.views.i18n
 
+import apps.catalog.urls
+import apps.users.urls
+
 urlpatterns = [
-    django.urls.path("", django.urls.include("apps.catalog.urls")),
+    django.urls.path(
+        "",
+        django.urls.include(
+            apps.catalog.urls,
+        ),
+    ),
+    django.urls.path(
+        "users/",
+        django.urls.include(
+            apps.users.urls,
+        ),
+    ),
     django.urls.path(
         "i18n/",
         django.urls.include(
@@ -16,11 +30,12 @@ urlpatterns = [
     django.urls.path(
         "jsi18n/",
         django.views.i18n.JavaScriptCatalog.as_view(),
-        name="javascript-catalog",
+        name="jsi18n",
     ),
     django.urls.path(
         "admin/",
         django.contrib.admin.site.urls,
+        name="admin",
     ),
 ]
 

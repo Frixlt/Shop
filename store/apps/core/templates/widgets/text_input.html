@@ -1,0 +1,48 @@
+{% comment %}
+Шаблон для виджета TextInput.
+Ожидает контекст, предоставляемый виджетом apps.core.widgets.TextInput.
+Включает:
+- widget.label: Текст метки.
+- widget.is_required: Флаг обязательности поля.
+- widget.attrs.id: ID для связи с label и JS.
+- widget.type: Тип поля input (text, email, tel, etc.).
+- widget.name: Имя поля для отправки формы.
+- widget.value: Текущее значение поля.
+- widget.attrs: Дополнительные HTML атрибуты (placeholder, data-*, etc.).
+- widget.icon_class: Класс иконки Font Awesome для отображения слева.
+- widget.errors: Список ошибок валидации Django для этого поля (если есть).
+{% endcomment %}
+<div class="form-field">
+  {# Метка поля - controlled by the widget template now #}
+  {% if widget.label %}
+    {# Используем ID из контекста виджета #}
+    <label for="{{ widget.attrs.id }}">
+      {{ widget.label }}
+      {% if widget.is_required %}<span class="required-indicator">*</span>{% endif %}
+      {% if not widget.is_required %}<span class="optional-text">(необязательно)</span>{% endif %}
+    </label>
+  {% endif %}
+  {# Обертка для input и иконок #}
+  <div class="input-wrapper">
+    {# Основное поле ввода #}
+    <input type="{{ widget.type }}"
+      name="{{ widget.name }}"
+      {% if widget.attrs.id %}id="{{ widget.attrs.id }}"{% endif %} {# Устанавливаем ID здесь #}
+      class="auth-input"
+      {% if widget.value != None %}value="{{ widget.value|stringformat:'s' }}"{% endif %}
+      {% if widget.is_required %}required{% endif %}
+      {# Перебираем остальные атрибуты из widget.attrs #}
+      {% for attr_name, attr_value in widget.attrs.items %}
+        {% if attr_name != "id" %}{{ attr_name }}="{{ attr_value }}"{% endif %}
+      {% endfor %}>
+      {# Иконки #}
+      {% if widget.icon_class %}<i class="fas {{ widget.icon_class }} input-icon"></i>{% endif %}
+        <i class="fas fa-check-circle input-feedback success-icon"></i>
+        <i class="fas fa-times-circle input-feedback error-icon"></i>
+      </div>
+      {# Блок для отображения сообщений об ошибках #}
+      <div class="form-error"
+           {% if widget.attrs.id %}id="{{ widget.attrs.id }}-error"{% endif %}>
+        {% comment %} Сообщение об ошибке будет управляться JS {% endcomment %}
+      </div>
+    </div>

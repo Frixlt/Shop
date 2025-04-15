@@ -15,11 +15,13 @@
     <link rel="stylesheet"
           href="{% static 'packets/bootstrap-icons/font/bootstrap-icons.css' %}">
     <!-- Стили с компрессией -->
-    {% compress css %}
-      <link rel="stylesheet"
-            href="{% static 'scss/main.scss' %}"
-            type="text/x-scss">
-    {% endcompress %}
+    {% block css %}
+      {% compress css %}
+        <link rel="stylesheet"
+              href="{% static 'scss/main.scss' %}"
+              type="text/x-scss">
+      {% endcompress %}
+    {% endblock css %}
     <!-- Альтернативные языковые версии (исправленный вариант) -->
     {% get_available_languages as LANGUAGES %}
     {% get_language_info_list for LANGUAGES as languages %}
@@ -69,23 +71,12 @@
     <!-- Скрипты -->
     {% comment %} {% compress js %} {% endcomment %}
     <script src="{% url 'jsi18n' %}"></script>
-    <script type="module" src="{% static 'js/main.js' %}"></script>
-    <script type="text/javascript">
-    // Передаем язык в JS глобально
-      window.DJANGO_LANGUAGE_CODE = "{{ LANGUAGE_CODE }}";
-    </script>
+    <script type="text/javascript">window.DJANGO_LANGUAGE_CODE = "{{ LANGUAGE_CODE }}";</script>
+    {% block js %}
+      <script type="module" src="{% static 'js/main.js' %}"></script>
+    {% endblock js %}
+    {% block extra_js %}
+    {% endblock extra_js %}
     {% comment %} {% endcompress %} {% endcomment %}
-    <!-- Аналитика (может отличаться для разных языков) -->
-    {% if not debug %}
-      <script>
-        // Пример: Google Analytics с учетом языка
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'GA_MEASUREMENT_ID', {
-          'language': '{{ LANGUAGE_CODE }}'
-        });
-      </script>
-    {% endif %}
   </body>
 </html>
