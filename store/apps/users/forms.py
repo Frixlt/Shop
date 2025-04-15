@@ -6,40 +6,33 @@ from django.utils.translation import gettext_lazy as _
 
 
 class BaseForm(django.forms.Form):
+    # ... (без изменений) ...
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Get the auto_id format string for this form instance (e.g., 'id_%s')
         auto_id_format = self.auto_id
-
         for field_name, field in self.fields.items():
             widget = field.widget
-            # Check if it's our custom widget or its subclass
-            if isinstance(widget, (apps.core.widgets.TextInput, apps.core.widgets.PasswordInput)):
-                # Assign label and required status to the widget instance
+            if isinstance(
+                widget, (apps.core.widgets.TextInput, apps.core.widgets.PasswordInput, apps.core.widgets.SelectInput)
+            ):
                 widget.label = field.label
                 widget.is_required = field.required
-
-                # --- UPDATED: Calculate ID correctly ---
-                # Check if auto_id generation is enabled for this form
                 if auto_id_format and "%s" in auto_id_format:
-                    # Construct the ID using the form's format and the field's name
                     calculated_id = auto_id_format % field_name
-                    # Ensure the widget's attrs dictionary exists
                     if widget.attrs is None:
                         widget.attrs = {}
-                    # Set the calculated ID in the widget's attributes
-                    # This makes it available early, e.g., if the widget's __init__ needed it,
-                    # and ensures it's passed to the template context.
                     widget.attrs["id"] = calculated_id
-                # --- End UPDATED ---
+                    if isinstance(widget, apps.core.widgets.SelectInput):
+                        widget.choices = field.choices
 
 
 class TestAuthForm(BaseForm):
+    # ... (username, email, phone, password, confirm_password без изменений) ...
     username = django.forms.CharField(
         label=_("Username"),
         required=True,
         min_length=3,
-        widget=apps.core.widgets.TextInput(  # Use TextInput
+        widget=apps.core.widgets.TextInput(
             attrs={
                 "placeholder": _("Your name"),
                 "data-min-length": 3,
@@ -56,7 +49,7 @@ class TestAuthForm(BaseForm):
     email = django.forms.EmailField(
         label=_("Email"),
         required=True,
-        widget=apps.core.widgets.TextInput(  # Use TextInput
+        widget=apps.core.widgets.TextInput(
             attrs={
                 "placeholder": "your@email.com",
                 "data-pattern": r"""(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])""",
@@ -74,7 +67,7 @@ class TestAuthForm(BaseForm):
     phone = django.forms.CharField(
         label=_("Phone"),
         required=False,
-        widget=apps.core.widgets.TextInput(  # Use TextInput
+        widget=apps.core.widgets.TextInput(
             attrs={
                 "placeholder": "+7 (999) 123-4567",
                 "data-pattern": r"^\+?\d[\d\s\(\)-]{9,14}$",
@@ -88,13 +81,11 @@ class TestAuthForm(BaseForm):
             "invalid": _("Please enter a valid phone number."),
         },
     )
-
     password = django.forms.CharField(
         label=_("Password"),
         required=True,
         min_length=8,
-        # The field's name is 'password', default form auto_id is 'id_%s', so ID will be 'id_password'
-        widget=apps.core.widgets.PasswordInput(  # Use PasswordInput
+        widget=apps.core.widgets.PasswordInput(
             attrs={
                 "placeholder": _("Create a password"),
                 "data-min-length": 8,
@@ -108,15 +99,13 @@ class TestAuthForm(BaseForm):
         },
         help_text=_("Must contain at least 8 characters."),
     )
-
     confirm_password = django.forms.CharField(
         label=_("Confirm Password"),
         required=True,
-        widget=apps.core.widgets.PasswordInput(  # Use PasswordInput
+        widget=apps.core.widgets.PasswordInput(
             attrs={
                 "placeholder": _("Repeat your password"),
                 "data-required-message": _("Please confirm your password."),
-                # Link to the calculated ID of the 'password' field
                 "data-confirm-target": "id_password",
                 "data-mismatch-message": _("Passwords do not match."),
             },
@@ -127,7 +116,54 @@ class TestAuthForm(BaseForm):
         },
     )
 
-    # clean_phone remains the same
+    # --- Select Field ---
+    FRUIT_CHOICES = [
+        ("", _("Choose a fruit...")),
+        ("apple", _("Apple")),
+        ("banana", _("Banana")),
+        ("orange", _("Orange")),
+        ("grape", _("Grape")),
+        ("watermelon", _("Watermelon")),
+        ("strawberry", _("Strawberry")),
+        ("kiwi", _("Kiwi")),
+    ]
+
+    favorite_fruits = django.forms.MultipleChoiceField(
+        label=_("Favorite Fruits"),
+        required=True,
+        choices=FRUIT_CHOICES,
+        widget=apps.core.widgets.SelectInput(
+            config={
+                "max_selections": 3,
+                "placeholder": _("Choose up to {maxSelections} fruits"),
+                "placeholderAllSelected": _("Maximum {maxSelections} fruits selected"),
+                "icon": "fa-lemon",
+                "indicator_shape": "square",
+                "auto_deselect": True,
+                "searchable": True,
+                "show_count": True,
+                "show_selected": True,
+                "layout_order": ["count", "selected", "search", "options"],
+                "hide_selected_from_list": True,
+                "sticky_search": True,  # <-- Включаем опцию sticky search
+                "declension": {
+                    "variable": "remaining",
+                    "rules": [
+                        {"value": 1, "condition": "=", "form": _("fruit")},
+                        {"value": "2-4", "condition": "-", "form": _("fruits (gen)")},
+                        {"value": 0, "condition": "=", "form": _("fruits (pl)")},
+                        {"value": 5, "condition": ">=", "form": _("fruits (pl)")},
+                    ],
+                },
+            }
+        ),
+        error_messages={
+            "required": _("Please select at least one fruit."),
+        },
+    )
+    # --- End Select Field ---
+
+    # ... (clean methods без изменений) ...
     def clean_phone(self):
         phone = self.cleaned_data.get("phone")
         if phone:
@@ -136,7 +172,6 @@ class TestAuthForm(BaseForm):
                 raise django.core.exceptions.ValidationError(_("Phone number seems too short."), code="invalid_phone")
         return phone
 
-    # clean_confirm_password remains the same
     def clean_confirm_password(self):
         password = self.cleaned_data.get("password")
         confirm_password = self.cleaned_data.get("confirm_password")
@@ -144,10 +179,12 @@ class TestAuthForm(BaseForm):
             raise django.core.exceptions.ValidationError(_("Passwords do not match."), code="password_mismatch")
         return confirm_password
 
-    # clean remains the same
     def clean(self):
         cleaned_data = super().clean()
-        password = cleaned_data.get("password")
-        # Example: Add complexity check here if needed
-        # if password and ...
+        fruits = cleaned_data.get("favorite_fruits")
+        # Use get method for safety, provide default for max_fruits if widget config fails
+        max_fruits_config = getattr(self.fields["favorite_fruits"].widget, "config", {})
+        max_fruits = max_fruits_config.get("maxSelections", 3)  # Default to 3 if not found
+        if fruits and len(fruits) > max_fruits:
+            self.add_error("favorite_fruits", _("Please select no more than {count} fruits.").format(count=max_fruits))
         return cleaned_data

@@ -1,3 +1,6 @@
+// --"--\Catalog\store\static_dev\scss\modules\_forms.scss"--
+
+// --- Анимации (остаются как есть) ---
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -35,10 +38,13 @@
   }
 }
 
-// --- Auth Container and Tabs ---
+// --- Конец Анимации ---
+
+
+// --- Auth Container and Tabs (остаются как есть) ---
 .auth-container {
   max-width: 450px;
-  margin: 2rem auto; // Reduced top/bottom margin slightly
+  margin: 2rem auto;
   background: var(--card-background);
   padding: 2rem 2.5rem;
   border-radius: $border-radius;
@@ -100,10 +106,15 @@
   }
 }
 
+// --- Конец Auth Container ---
+
+
 // --- Form Fields (General) ---
 .form-field {
-  margin-bottom: 1.2rem;
-  position: relative;
+  margin-bottom: 1.2rem; // Стандартный отступ снизу для всех полей
+  position: relative; // Необходимо для некоторых внутренних элементов (но не для позиционирования options)
+
+  // --- Стили Анимации (применяются ко всем .form-field) ---
   opacity: 0;
   transform: translateY(10px);
   animation: fadeInUp 0.4s forwards;
@@ -137,75 +148,107 @@
     animation-delay: 0.35s;
   }
 
-  // Add more if needed
+  // Можно добавить еще
+  // --- Конец Стилей Анимации ---
 
-  // Reduce margin for specific groups
+  // Уменьшаем отступ для групп радио/чекбоксов (остается как есть)
   &:has(.radio-group),
   &.checkbox-field {
     margin-bottom: 0.8rem;
   }
-}
 
-.form-field label {
-  display: flex; // Changed from block to flex
-  align-items: center;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--text-color-secondary);
-  position: relative; // For underline effect
+  // --- Стили для Label (применяются ко всем) ---
+  label {
+    display: flex; // Используем flex для выравнивания индикаторов
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-color-secondary);
+    position: relative; // Для ::after эффекта
 
-  // Underline effect on focus-within (excluding specific labels)
-  &:not(.radio-group-label):not(.radio-label):not(.checkbox-label):not(.radio-button)::after {
-    content: "";
-    position: absolute;
-    bottom: -3px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background-color: var(--accent-color);
-    transition: width $transition-speed ease;
+    // Эффект подчеркивания (для TextInput/PasswordInput)
+    // НЕ применяем к label для селекта или радио/чекбоксов
+    // Используем :not() чтобы исключить кастомный селект и другие типы
+    &:not(.radio-group-label):not(.radio-label):not(.checkbox-label):not([for^="custom_id_"]) {
+
+      // Исключаем label для custom select
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: -3px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: var(--accent-color);
+        transition: width $transition-speed ease;
+      }
+    }
   }
+
+  // Активация подчеркивания при фокусе внутри поля (для TextInput/PasswordInput)
+  // Исключаем поля селекта, радио, чекбоксы из этого эффекта
+  // Используем :has для таргетинга .input-wrapper (текстовые поля)
+  &:has(.input-wrapper:focus-within) label:not(.radio-group-label):not(.radio-label):not(.checkbox-label):not([for^="custom_id_"]) {
+    &::after {
+      width: 100%;
+    }
+  }
+
+  // --- Конец Стили для Label ---
+
+  // Индикаторы (применяются ко всем)
+  .optional-text {
+    font-size: 0.8rem;
+    color: var(--text-color-secondary);
+    opacity: 0.7;
+    font-weight: normal;
+    margin-left: 4px;
+  }
+
+  .required-indicator {
+    color: var(--error-color);
+    margin-left: 4px;
+    font-weight: bold;
+  }
+
+  .form-field-description {
+    font-size: 0.8rem;
+    color: var(--text-color-secondary);
+    margin-top: 0.3rem; // Отступ описания от поля
+    margin-bottom: 0; // Убираем нижний отступ описания
+  }
+
 }
 
-// Add focus-within styling directly to form-field for the label effect
-.form-field:focus-within label:not(.radio-group-label):not(.radio-label):not(.checkbox-label):not(.radio-button)::after {
-  width: 100%;
-}
+// --- Конец .form-field ---
 
 
-.optional-text {
-  font-size: 0.8rem;
-  color: var(--text-color-secondary);
-  opacity: 0.7;
-  font-weight: normal;
-  margin-left: 4px;
-}
-
-// --- Form Error Message ---
+// --- Form Error Message (General) ---
 .form-error {
   color: var(--error-color);
   font-size: 0.85rem;
-  margin-top: 0.3rem; // Reduced from 0.4rem
-  display: none; // Initially hidden
-  min-height: 1.2em; // Keep space even when hidden
+  margin-top: 0.3rem; // Стандартный отступ сверху для ошибки
+  display: none; // Скрыто по умолчанию
+  min-height: 1.2em; // Резервируем место
+  width: 100%; // Занимает всю ширину родителя (.form-field)
 
-  // Apply shake animation only when error is shown (managed by JS/widget)
   &.shake {
+    // Анимация тряски
     animation: shake 0.4s linear;
   }
 }
 
-// Error display logic moved to JS (shows when wrapper has .error class)
-// Remove this rule: .input-wrapper.error + .form-error { display: block; }
+// --- Конец Form Error ---
 
-.form-field-description {
-  font-size: 0.8rem;
-  color: var(--text-color-secondary);
-  margin-top: 0.3rem;
-}
 
-// --- Auth Button ---
+// --- Стили для конкретных виджетов импортируются отдельно ---
+// Пример:
+// @import 'widgets/text_input';
+// @import 'widgets/select_input';
+
+
+// --- Остальные стили форм (Auth Button, Links, Checkbox, Radio и т.д.) ---
 .auth-button {
   width: 100%;
   padding: 0.9rem 1.5rem;
@@ -222,11 +265,10 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  margin-top: 1rem; // Keep margin-top
+  margin-top: 1rem; // Отступ сверху перед кнопкой
   position: relative;
   overflow: hidden;
 
-  // Ripple effect
   &::before {
     content: '';
     position: absolute;
@@ -238,18 +280,18 @@
     border-radius: 50%;
     transform: translate(-50%, -50%);
     transition: width 0.6s ease, height 0.6s ease;
-    pointer-events: none; // Prevent interference
+    pointer-events: none;
   }
 
   &:active::before {
-    width: 300px; // Large enough to cover button
+    width: 300px;
     height: 300px;
   }
 
   &:hover:not(:disabled) {
     background: var(--accent-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(var(--accent-color-rgb), 0.3); // Use RGB variable
+    box-shadow: 0 4px 10px rgba(var(--accent-color-rgb), 0.3);
   }
 
   &:disabled {
@@ -260,32 +302,10 @@
   }
 
   i {
-    // Inherit styles from example (if icons are used inside)
-    // Example: margin-right: 0.3rem; if icon is before text
+    /* Стили для иконок внутри кнопки, если нужны */
   }
 }
 
-// --- Form Success Message ---
-.form-success {
-  color: var(--accent-color);
-  font-size: 0.9rem;
-  margin-top: 1.5rem;
-  text-align: center;
-  padding: 0.8rem;
-  border: 1px solid var(--accent-color);
-  border-radius: $border-radius;
-  background-color: var(--accent-light);
-  display: none;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-
-  &.active {
-    display: block;
-    opacity: 1;
-  }
-}
-
-// --- Additional Form Elements ---
 .form-options {
   display: flex;
   justify-content: space-between;
@@ -308,7 +328,7 @@
 .form-check-label {
   color: var(--text-color-secondary);
   cursor: pointer;
-  margin-bottom: 0; // Override default label margin
+  margin-bottom: 0; // Переопределяем отступ label по умолчанию
 }
 
 .auth-link {
@@ -329,117 +349,15 @@
   color: var(--text-color-secondary);
 }
 
-// --- Styles for Specific Input Types ---
-
-// Select
-.select-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.auth-select {
-  width: 100%;
-  padding: 0.8rem 1rem 0.8rem 2.5rem; // Adjust padding like auth-input
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  background: var(--input-bg);
-  color: var(--text-color);
-  font-size: 1rem;
-  transition: all $transition-speed ease;
-  height: 44px;
-  appearance: none; // Remove default arrow
-  cursor: pointer;
-
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px var(--input-focus);
-    border-color: var(--accent-color);
-  }
-}
-
-.select-arrow {
-  position: absolute;
-  right: 0.9rem;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: var(--text-color-secondary);
-}
-
-// Textarea
-.auth-textarea {
-  width: 100%;
-  padding: 0.8rem 1rem 0.8rem 2.5rem; // Adjust padding like auth-input
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  background: var(--input-bg);
-  color: var(--text-color);
-  font-size: 1rem;
-  transition: all $transition-speed ease;
-  resize: vertical;
-  min-height: 100px;
-  font-family: $font-family-base; // Ensure font consistency
-
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px var(--input-focus);
-    border-color: var(--accent-color);
-  }
-}
-
-// File Input
-.file-field {
-  position: relative;
-}
-
-.file-input {
-  position: absolute;
-  left: 0;
-  top: 0;
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-}
-
-.file-button {
+// Стили для нативных radio/checkbox, если они используются напрямую
+.checkbox-field {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.8rem 1rem;
-  background: var(--input-bg);
-  border: 1px dashed var(--border-color);
-  border-radius: 6px;
-  color: var(--text-color-secondary);
-  font-size: 0.9rem;
-  transition: all $transition-speed ease;
-
-  &:hover {
-    background: rgba(var(--accent-color-rgb), 0.05);
-    border-color: var(--accent-color);
-  }
-}
-
-.file-name {
-  margin-top: 0.5rem;
-  font-size: 0.85rem;
-  color: var(--text-color-secondary);
-}
-
-// Native Checkbox & Radio Specific Styles
-.form-field.checkbox-field,
-.form-field.radio-field {
-  // Target specific container classes
-  display: flex;
-  align-items: center;
   margin-bottom: 0.8rem;
-  gap: 0.5rem;
 }
 
-.checkbox-input,
-.radio-input {
-  // Applied to the input element itself
+.checkbox-input {
   margin: 0;
   cursor: pointer;
   accent-color: var(--accent-color);
@@ -459,22 +377,18 @@
   flex-wrap: wrap;
   gap: 4px;
   line-height: 1.4;
-  margin-bottom: 0; // Override default label margin
+  margin-bottom: 0;
 
-  // Style links within the label
   .auth-link {
-    font-size: inherit; // Ensure link size matches label
+    font-size: inherit;
     line-height: inherit;
   }
 }
 
 .checkbox-text {
-  // Span inside checkbox label
   color: var(--text-color-secondary);
 }
 
-
-// Radio Group (Native)
 .radio-group {
   display: flex;
   flex-direction: column;
@@ -482,7 +396,6 @@
 }
 
 .radio-group-label {
-  // The <label> acting as the group title
   display: block;
   margin-bottom: 0.3rem;
   font-size: 0.9rem;
@@ -490,24 +403,38 @@
   color: var(--text-color-secondary);
 }
 
+.radio-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+
+// Немного уменьшен отступ
+.radio-input {
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--accent-color);
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
 .radio-label {
-  // Label associated with a single native radio input
   font-size: 0.9rem;
   color: var(--text-color-secondary);
   cursor: pointer;
   user-select: none;
   line-height: normal;
-  margin-bottom: 0; // Override default label margin
+  margin-bottom: 0;
 }
-
 
 // Button-like Radio Inputs
 .radio-button-group {
   margin-bottom: 1.5rem;
 }
 
-// Reuse .radio-group-label for consistency
-
+// .radio-group-label { используется тот же стиль }
 .radio-buttons {
   display: flex;
   flex-wrap: wrap;
@@ -515,16 +442,14 @@
 }
 
 .radio-button {
-  // The <label> acting as the button container
   position: relative;
   display: inline-block;
   cursor: pointer;
-  text-decoration: none; // Remove underline from label
-  margin-bottom: 0; // Override default label margin
+  margin-bottom: 0;
 }
 
-.radio-input {
-  // Hidden input for button-like radios
+// .radio-input { скрытый }
+.radio-input[type="radio"] {
   position: absolute;
   opacity: 0;
   cursor: pointer;
@@ -532,8 +457,8 @@
   width: 0;
 }
 
+// Уточняем селектор для скрытия
 .radio-btn {
-  // The visible <span> styled as a button
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -545,9 +470,10 @@
   font-weight: 500;
   font-size: 0.95rem;
   transition: all $transition-speed ease;
-  font-family: $font-family-button; // Poppins
+  font-family: $font-family-button;
   min-width: 100px;
   text-align: center;
+  text-decoration: none;
 }
 
 .radio-btn:hover {
@@ -555,7 +481,6 @@
   box-shadow: 0 2px 5px var(--box-shadow-color);
 }
 
-// Styles when the hidden radio input is checked
 .radio-input:checked+.radio-btn {
   background: var(--accent-color);
   color: $white;
@@ -564,18 +489,37 @@
   box-shadow: 0 4px 8px rgba(var(--accent-color-rgb), 0.3);
 }
 
-// Focus style applied to the visible button when hidden input has focus
 .radio-input:focus+.radio-btn {
   box-shadow: 0 0 0 3px var(--input-focus);
 }
 
+// Form Success Message
+.form-success {
+  color: var(--accent-color);
+  font-size: 0.9rem;
+  margin-top: 1.5rem;
+  text-align: center;
+  padding: 0.8rem;
+  border: 1px solid var(--accent-color);
+  border-radius: $border-radius;
+  background-color: var(--accent-light);
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
 
-// --- Responsive Adjustments ---
+  &.active {
+    display: block;
+    opacity: 1;
+  }
+}
+
+
+// --- Адаптивность ---
 @media screen and (max-width: 768px) {
   .auth-container {
-    max-width: 100%; // Use full width available with padding
+    max-width: 100%;
     padding: 1.5rem;
-    margin: 2rem 1rem; // Consistent margin
+    margin: 2rem 1rem;
   }
 
   .auth-button {
@@ -588,49 +532,38 @@
     gap: 1rem;
   }
 
-  .auth-form {
-    // Removed padding: 0; as container padding is adjusted
-  }
+  // .auth-form { padding: 0; } // Убрано, т.к. паддинг у контейнера
 }
 
 @media screen and (max-width: 480px) {
   .auth-container {
-    padding: 1.5rem 1rem; // Keep padding consistent
+    padding: 1.5rem 1rem;
   }
 
   .auth-tabs {
     flex-direction: column;
     border-bottom: none;
-    align-items: stretch; // Make tabs full width
+    align-items: stretch;
   }
 
   .auth-tab {
     width: 100%;
     margin-bottom: 0.5rem;
     border-bottom: 1px solid var(--border-color);
-    position: relative; // For potential future indicators if needed
-
-    &:last-child {
-      // Removed border-bottom: none; -> Keep border for all in column layout
-    }
-
-    &.active {
-      // Replace border-bottom with a different indicator if desired,
-      // or simply rely on text color/weight change.
-      // Example: add a left border instead
-      // border-left: 3px solid var(--accent-color);
-      // border-bottom-color: transparent; // Remove bottom border when active
-    }
+    position: relative;
   }
 
+  // .auth-tab:last-child { border-bottom: none; } // Убрано, рамка нужна для всех в колонке
+  // .auth-tab.active { border-bottom-color: transparent; } // Убрано, можно добавить другой индикатор если нужно
   .tab-indicator {
-    display: none; // Hide line indicator on mobile
+    display: none;
   }
 
   .form-field {
     margin-bottom: 1rem;
   }
 
+  // Немного уменьшаем отступ на мобилках
   .auth-button {
     font-size: 0.9rem;
   }
@@ -642,21 +575,15 @@
   }
 
   .radio-button {
-    // Label container
     width: 100%;
   }
 
   .radio-btn {
-    // Span button
-    display: flex; // Ensure flex properties apply
+    display: flex;
     width: 100%;
   }
 }
 
-.required-indicator {
-  color: var(--error-color); // Use the existing error color variable
-  margin-left: 4px; // Add a small space after the label text
-  font-weight: bold; // Make it stand out a bit more
-  // vertical-align: super; // Optional: If you want it slightly raised
-  // font-size: 1.1em;      // Optional: Make it slightly larger
+.form-field:has(.select--open) {
+  z-index: 20;
 }

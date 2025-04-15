@@ -1,0 +1,50 @@
+{# --"--\Catalog\store\apps\core\templates\widgets\select_input.html"-- #}
+{% load i18n %}
+<div class="form-field">
+  {% if widget.label %}
+    <label for="{{ widget.custom_widget_id }}">
+      {{ widget.label }}
+      {% if widget.is_required %}<span class="required-indicator">*</span>{% endif %}
+      {% if not widget.is_required %}<span class="optional-text">(необязательно)</span>{% endif %}
+    </label>
+  {% endif %}
+  <div id="{{ widget.custom_widget_id }}"
+       class="select django-custom-select-widget"
+       data-native-select-id="{{ widget.native_select_id }}"
+       data-config="{{ widget.config_json|escape }}"
+       data-choices="{{ widget.js_choices|escape }}"
+       data-initial-value="{{ widget.value|join:','|escape }}"
+       {% if widget.is_required and widget.required_message_attr %} data-required-message="{{ widget.required_message_attr|escape }}" {% endif %}>
+    <div class="select-header"
+         {% if not widget.label %}style="margin-top: 1.4rem;"{% endif %}>
+      {% if widget.config.icon %}<i class="fas {{ widget.config.icon }} select-header-icon"></i>{% endif %}
+      <span class="select-header-text">{% trans "Loading..." %}</span>
+    </div>
+    <div class="select-options">{# JS content #}</div>
+  </div>
+  <select
+    name="{{ widget.name }}"
+    id="{{ widget.native_select_id }}" {# <- ID Нативного селекта #}
+    {% if widget.attrs.multiple %}multiple{% endif %}
+    {% include "django/forms/widgets/attrs.html" with widget=widget only %}
+    {% if widget.is_required and widget.required_message_attr %}
+      data-required-message="{{ widget.required_message_attr|escape }}"
+    {% endif %}
+    >
+    {% for group_name, group_choices, group_index in widget.optgroups %}
+      {% if group_name %}<optgroup label="{{ group_name }}">{% endif %}
+        {% for option in group_choices %}
+          {% if option.value %}
+            <option value="{{ option.value|stringformat:'s' }}"
+                    {% if option.selected %}selected{% endif %}>{{ option.label }}</option>
+          {% endif %}
+        {% endfor %}
+        {% if group_name %}</optgroup>{% endif %}
+    {% endfor %}
+  </select>
+  {# --- ИСПРАВЛЕНО: ID блока ошибки должен соответствовать ID нативного селекта + '-error' --- #}
+  <div class="form-error" id="{{ widget.native_select_id }}-error">
+    {% comment %} Сообщение об ошибке {% endcomment %}
+  </div>
+  {# --- Конец исправления --- #}
+</div>
