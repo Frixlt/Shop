@@ -1,11 +1,11 @@
-# --"--\Catalog\store\apps\core\widgets.py"--
 import json
-import django.forms.widgets
-import django.template.loader
-from django.utils.safestring import mark_safe
-from django.utils.functional import Promise
-from django.utils.encoding import force_str
+
 from django.core.exceptions import ImproperlyConfigured
+import django.forms.widgets
+from django.utils.encoding import force_str
+from django.utils.functional import Promise
+
+__all__ = ()
 
 
 class TextInput(django.forms.widgets.TextInput):
@@ -28,6 +28,7 @@ class TextInput(django.forms.widgets.TextInput):
         final_attrs = widget_context.get("attrs", {})
         if "id" not in final_attrs:
             final_attrs["id"] = attrs.get("id", f"id_{name}")
+
         widget_context["attrs"] = final_attrs
         return context
 
@@ -54,7 +55,7 @@ class SelectInput(django.forms.widgets.Select):
         "icon": "fa-angle-down",
         "indicatorShape": "circle",
         "autoDeselect": True,
-        "countTitle": "Выбрано:",
+        "countTitle": "Выберано:",
         "countTitleAllSelected": "Выбрано (макс. {max}):",
         "selectedItemTextLength": 15,
         "autoCloseOnComplete": False,
@@ -72,11 +73,9 @@ class SelectInput(django.forms.widgets.Select):
         attrs = attrs or {}
         attrs["style"] = attrs.get("style", "") + "display: none;"
         attrs["class"] = attrs.get("class", "") + " django-select-input-native"
-        # Важно: Вызываем super().__init__ *здесь*, до работы с self.attrs
         super().__init__(attrs=attrs)
         self.choices = choices
 
-        # Объединяем конфигурации
         self.config = self.default_config.copy()
         if config:
             processed_config = {}
@@ -84,30 +83,40 @@ class SelectInput(django.forms.widgets.Select):
                 parts = key.split("_")
                 camel_case_key = parts[0] + "".join(word.capitalize() for word in parts[1:])
                 processed_config[camel_case_key] = value
+
             self.config.update(processed_config)
 
-        # Валидация и корректировка min/max selections
+        # Валидация min/max selections
         min_sel = self.config.get("minSelections", 0)
         max_sel = self.config.get("maxSelections", 1)
         if min_sel < 0:
             min_sel = 0
+
         if max_sel < 1:
             max_sel = 1
+
         if min_sel > max_sel:
             min_sel = max_sel
+
         self.config["minSelections"] = min_sel
         self.config["maxSelections"] = max_sel
 
-        # Определяем, является ли выбор множественным
+        # Проверка согласованности required и minSelections
+        is_required = getattr(self, "is_required", False) or self.attrs.get("required", False)
+        if is_required and min_sel < 1:
+            raise ImproperlyConfigured(
+                f"Field is marked as required (is_required={is_required}), but 'min_selections' is set to {min_sel}. "
+                "For a required field, 'min_selections' must be at least 1.",
+            )
+
         self.allow_multiple_selected = max_sel > 1
         if self.allow_multiple_selected:
             self.attrs["multiple"] = "multiple"
         elif "multiple" in self.attrs:
             del self.attrs["multiple"]
 
-        # Корректируем конфиг для single select
         if not self.allow_multiple_selected:
-            self.config["minSelections"] = min(min_sel, 1)  # Убедимся, что min не больше 1
+            self.config["minSelections"] = min(min_sel, 1)
             self.config["autoDeselect"] = True
             self.config["indicatorShape"] = "circle"
             self.config["hideSelectedFromList"] = self.config.get("hideSelectedFromList", False)
@@ -115,32 +124,23 @@ class SelectInput(django.forms.widgets.Select):
             self.config["showCount"] = False
             self.config["layoutOrder"] = [i for i in self.config["layoutOrder"] if i not in ("selected", "count")]
 
-        # --- НОВАЯ ПРОВЕРКА: required и minSelections ---
-        # Эта проверка должна выполняться *после* того, как мы получили финальное
-        # значение minSelections из self.config
-        final_min_sel = self.config["minSelections"]
-        # Атрибут required у самого виджета (не у поля формы!) может быть не задан явно,
-        # он наследуется от поля формы в BaseForm. Поэтому проверять self.is_required здесь
-        # еще рано. Вместо этого, мы будем проверять это противоречие в BaseForm.__init__
-        # Однако, мы можем проверить, если minSelections == 0, но поле *является* multiple choice.
-        # Это само по себе не ошибка, но может быть нелогично (хотя и допустимо).
-        # Оставим основную проверку в BaseForm.
-        # --- КОНЕЦ НОВОЙ ПРОВЕРКИ ---
-
     def _resolve_lazy_strings(self, data):
         if isinstance(data, dict):
             return {key: self._resolve_lazy_strings(value) for key, value in data.items()}
-        elif isinstance(data, list):
+
+        if isinstance(data, list):
             return [self._resolve_lazy_strings(item) for item in data]
-        elif isinstance(data, Promise):
+
+        if isinstance(data, Promise):
             return force_str(data)
-        else:
-            return data
+
+        return data
 
     def build_attrs(self, base_attrs, extra_attrs=None):
         attrs = super().build_attrs(base_attrs, extra_attrs=extra_attrs)
         if "id" not in attrs and self.attrs.get("id"):
             attrs["id"] = self.attrs["id"]
+
         return attrs
 
     def get_context(self, name, value, attrs):

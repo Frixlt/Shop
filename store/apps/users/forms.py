@@ -1,19 +1,25 @@
-# --"--\Catalog\store\apps\users\forms.py"--
 import django.core.exceptions
 import django.forms
-import apps.core.widgets  # Import the widgets module
 from django.utils.translation import gettext_lazy as _
+
+import apps.core.widgets
+
+__all__ = ()
 
 
 class BaseForm(django.forms.Form):
-    # ... (без изменений) ...
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         auto_id_format = self.auto_id
         for field_name, field in self.fields.items():
             widget = field.widget
             if isinstance(
-                widget, (apps.core.widgets.TextInput, apps.core.widgets.PasswordInput, apps.core.widgets.SelectInput)
+                widget,
+                (
+                    apps.core.widgets.TextInput,
+                    apps.core.widgets.PasswordInput,
+                    apps.core.widgets.SelectInput,
+                ),
             ):
                 widget.label = field.label
                 widget.is_required = field.required
@@ -21,13 +27,13 @@ class BaseForm(django.forms.Form):
                     calculated_id = auto_id_format % field_name
                     if widget.attrs is None:
                         widget.attrs = {}
+
                     widget.attrs["id"] = calculated_id
                     if isinstance(widget, apps.core.widgets.SelectInput):
                         widget.choices = field.choices
 
 
 class TestAuthForm(BaseForm):
-    # ... (username, email, phone, password, confirm_password без изменений) ...
     username = django.forms.CharField(
         label=_("Username"),
         required=True,
@@ -116,7 +122,6 @@ class TestAuthForm(BaseForm):
         },
     )
 
-    # --- Select Field ---
     FRUIT_CHOICES = [
         ("", _("Choose a fruit...")),
         ("apple", _("Apple")),
@@ -134,6 +139,7 @@ class TestAuthForm(BaseForm):
         choices=FRUIT_CHOICES,
         widget=apps.core.widgets.SelectInput(
             config={
+                "min_selections": 0,
                 "max_selections": 3,
                 "placeholder": _("Choose up to {maxSelections} fruits"),
                 "placeholderAllSelected": _("Maximum {maxSelections} fruits selected"),
@@ -145,7 +151,7 @@ class TestAuthForm(BaseForm):
                 "show_selected": True,
                 "layout_order": ["count", "selected", "search", "options"],
                 "hide_selected_from_list": True,
-                "sticky_search": True,  # <-- Включаем опцию sticky search
+                "sticky_search": True,
                 "declension": {
                     "variable": "remaining",
                     "rules": [
@@ -155,36 +161,46 @@ class TestAuthForm(BaseForm):
                         {"value": 5, "condition": ">=", "form": _("fruits (pl)")},
                     ],
                 },
-            }
+                "min_selections_message": _("Please select at least {min} fruit(s)."),
+            },
         ),
         error_messages={
             "required": _("Please select at least one fruit."),
         },
     )
-    # --- End Select Field ---
 
-    # ... (clean methods без изменений) ...
     def clean_phone(self):
         phone = self.cleaned_data.get("phone")
         if phone:
             cleaned_phone = "".join(d for d in phone if d.isdigit())
             if len(cleaned_phone) > 0 and len(cleaned_phone) < 10:
-                raise django.core.exceptions.ValidationError(_("Phone number seems too short."), code="invalid_phone")
+                raise django.core.exceptions.ValidationError(
+                    _("Phone number seems too short."),
+                    code="invalid_phone",
+                )
+
         return phone
 
     def clean_confirm_password(self):
         password = self.cleaned_data.get("password")
         confirm_password = self.cleaned_data.get("confirm_password")
         if password and confirm_password and password != confirm_password:
-            raise django.core.exceptions.ValidationError(_("Passwords do not match."), code="password_mismatch")
+            raise django.core.exceptions.ValidationError(
+                _("Passwords do not match."),
+                code="password_mismatch",
+            )
+
         return confirm_password
 
     def clean(self):
         cleaned_data = super().clean()
         fruits = cleaned_data.get("favorite_fruits")
-        # Use get method for safety, provide default for max_fruits if widget config fails
         max_fruits_config = getattr(self.fields["favorite_fruits"].widget, "config", {})
-        max_fruits = max_fruits_config.get("maxSelections", 3)  # Default to 3 if not found
+        max_fruits = max_fruits_config.get("maxSelections", 3)
         if fruits and len(fruits) > max_fruits:
-            self.add_error("favorite_fruits", _("Please select no more than {count} fruits.").format(count=max_fruits))
+            self.add_error(
+                "favorite_fruits",
+                _("Please select no more than {count} fruits.").format(count=max_fruits),
+            )
+
         return cleaned_data

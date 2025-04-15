@@ -1,9 +1,12 @@
-# --"--\Catalog\store\apps\users\views.py"--
+import pprint
+
 import django.http
 import django.shortcuts
 import django.views.generic
+
 import apps.users.forms
-import pprint  # Import pprint for potentially cleaner dictionary printing
+
+__all__ = ()
 
 
 class AuthorizeView(django.views.generic.TemplateView):
@@ -26,9 +29,7 @@ class AuthorizeView(django.views.generic.TemplateView):
             print("-" * 40)
             # --- END ADDED PRINTING ---
 
-            # Continue with the original success response
             return django.http.JsonResponse({"status": "success", "message": "Форма успешно отправлена!"})
 
-        # Handle invalid form
         errors = {field: error for field, error in form.errors.items()}
         return django.http.JsonResponse({"status": "error", "errors": errors}, status=400)

@@ -1,5 +1,5 @@
-import django.urls
 from django.contrib.auth.views import PasswordResetView
+import django.urls
 
 import apps.users.views
 

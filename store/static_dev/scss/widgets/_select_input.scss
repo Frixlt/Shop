@@ -1,5 +1,3 @@
-// --"--\Catalog\store\static_dev\scss\widgets\_select_input.scss"--
-
 *,
 *::before,
 *::after {
@@ -20,7 +18,7 @@
     border: 1px solid var(--border-color);
     padding: 0.8rem 1rem;
     padding-right: 2.5rem;
-    padding-left: var(--icon-padding, 1rem);
+    padding-left: var(--icon-padding, 1rem); // Default padding, adjust if icon present
     cursor: pointer;
     background: var(--input-bg);
     display: flex;
@@ -33,9 +31,20 @@
     position: relative;
     box-shadow: 0 1px 3px var(--box-shadow-color);
 
+    // Adjust text padding if icon is present
     i.select-header-icon+span.select-header-text {
-      padding-left: 1.8rem;
+      padding-left: 1.8rem; // Space for icon + gap
     }
+  }
+
+  // Set CSS variable if icon is present for padding adjustment
+  &:has(.select-header-icon) .select-header {
+    --icon-padding: 2.8rem; // left icon size + padding
+  }
+
+  // Reset if no icon (or handle via class like select--no-icon)
+  &:not(:has(.select-header-icon)) .select-header {
+    --icon-padding: 1rem;
   }
 
   .select-header:hover {
@@ -44,13 +53,13 @@
   }
 
   .select-header::after {
-    content: '\f078';
+    content: '\f078'; // Font Awesome chevron-down
     font-family: 'Font Awesome 6 Free';
     font-weight: 900;
     font-size: 10px;
     color: var(--text-color-secondary);
     transition: transform 0.3s ease, color 0.3s ease;
-    padding: 5px;
+    padding: 5px; // Clickable area
     position: absolute;
     right: 1rem;
     top: 50%;
@@ -70,7 +79,7 @@
     color: var(--text-color-secondary);
     font-size: 1rem;
     transition: all 0.3s ease;
-    pointer-events: none;
+    pointer-events: none; // Don't block clicks on header
   }
 
   &.select--open .select-header-icon {
@@ -85,7 +94,7 @@
     flex-grow: 1;
     font-weight: 400;
     letter-spacing: 0.01em;
-    padding-right: 0.5rem;
+    padding-right: 0.5rem; // Space before chevron
   }
 
   &.select--open .select-header {
@@ -96,7 +105,7 @@
   // Options container
   .select-options {
     position: absolute; // <-- Позиционируется относительно .django-custom-select-widget
-    top: calc(100% + 8px);
+    top: calc(100% + 8px); // Gap between header and options
     left: 0;
     right: 0;
     border: 1px solid var(--border-color);
@@ -106,7 +115,7 @@
     max-height: 260px;
     overflow-y: auto;
     display: none;
-    z-index: 1000;
+    z-index: 1000; // Ensure it overlaps content below
     box-shadow: 0 6px 18px var(--box-shadow-color);
     animation: fadeIn 0.2s ease;
   }
@@ -127,17 +136,19 @@
     display: block;
   }
 
+  // Inline mode specific styles
   &.select--inline .select-options {
     position: static;
     box-shadow: none;
     border-radius: 0 0 8px 8px;
     border: 1px solid var(--border-color);
-    border-top: none;
-    margin-top: -1px;
+    border-top: none; // Avoid double border
+    margin-top: -1px; // Overlap slightly with header border
     max-height: none;
     overflow-y: visible;
   }
 
+  // Scrollbar styles
   .select-options::-webkit-scrollbar {
     width: 6px;
   }
@@ -158,22 +169,23 @@
 
   // Search input styles
   .select-search-wrapper {
-    position: relative;
-    padding: 12px;
+    position: relative; // For icon positioning
+    padding: 12px; // Consistent padding around search
     border-bottom: 1px solid var(--border-color);
-    background: var(--card-bg);
-    z-index: 1;
+    background: var(--card-bg); // Ensure background matches options
+    z-index: 1; // Keep above scrolling options if sticky
   }
 
+  // Sticky search bar
   &.select--sticky-search .select-search-wrapper {
     position: sticky;
     top: 0;
   }
 
   .select-search {
-    padding: 0.7rem 1rem 0.7rem 2.5rem;
+    padding: 0.7rem 1rem 0.7rem 2.5rem; // Padding: top, right, bottom, left (for icon)
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 8px; // Consistent radius
     width: 100%;
     background: var(--input-bg);
     color: var(--text-color);
@@ -189,14 +201,14 @@
 
   .select-search-icon {
     position: absolute;
-    left: calc(12px + 12px);
+    left: calc(12px + 12px); // wrapper padding + desired icon padding
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-color-secondary);
     font-size: 0.9rem;
     pointer-events: none;
     transition: color 0.3s ease;
-    z-index: 1;
+    z-index: 1; // Ensure icon is visible
   }
 
   .select-search:focus+.select-search-icon {
@@ -205,29 +217,39 @@
 
   // Options list container
   .select-options-list {
-    background: inherit;
+    background: inherit; // Inherit background from .select-options
   }
 
   // Individual option styles
   .select-option {
-    padding: 0.85rem 1rem;
+    padding: 0.85rem 1rem; // Consistent padding
     display: flex;
     align-items: center;
     cursor: pointer;
-    gap: 1rem;
+    gap: 1rem; // Space between checkmark and text
     color: var(--text-color);
     transition: all 0.2s ease;
     position: relative;
-    overflow: hidden;
-    animation: slideDown 0.3s ease forwards;
+    overflow: hidden; // For pseudo-elements
+    // Animation properties - apply directly or via JS
+    animation: slideDown 0.3s ease forwards; // Example animation
     opacity: 0;
     animation-fill-mode: both;
-    background: transparent;
+    background: transparent; // Default background
 
     &:hover {
-      background: var(--input-bg);
+      background: var(--input-bg); // Use input background for hover
     }
   }
+
+  // Stagger animation delays (example)
+  // Can be applied via JS for more control if list is dynamic
+  @for $i from 1 through 10 {
+    .select-option:nth-child(#{$i}) {
+      animation-delay: #{min($i * 0.03, 0.3)}s;
+    }
+  }
+
 
   @keyframes slideDown {
     from {
@@ -242,9 +264,10 @@
   }
 
   .select-option:active {
-    transform: scale(0.99);
+    transform: scale(0.99); // Slight shrink on click
   }
 
+  // Accent indicator line on hover/selected
   .select-option::after {
     content: '';
     position: absolute;
@@ -252,26 +275,49 @@
     top: 0;
     width: 3px;
     height: 100%;
-    background: transparent;
+    background: transparent; // Hidden by default
     transition: background 0.2s ease;
   }
 
   .select-option:hover::after {
-    background: var(--accent-color);
+    background: var(--accent-color); // Show accent color on hover
   }
 
   .select-option--selected {
-    background: var(--accent-light);
-    color: var(--accent-color);
+    background: var(--accent-light); // Use light accent background for selected
+    color: var(--accent-color); // Use accent color for text
     font-weight: 500;
   }
 
   .select-option--selected::after {
-    background: var(--accent-color);
+    background: var(--accent-color); // Ensure accent line is visible when selected
   }
 
   .select-option--hidden {
-    display: none !important;
+    display: none !important; // Force hide
+  }
+
+  // Shake animation for feedback (e.g., when selection limit reached)
+  .select-option--shake {
+    animation: shakeOption 0.4s linear;
+  }
+
+  @keyframes shakeOption {
+
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+
+    20%,
+    60% {
+      transform: translateX(-3px);
+    }
+
+    40%,
+    80% {
+      transform: translateX(3px);
+    }
   }
 
   // Checkmark styles
@@ -281,7 +327,7 @@
     border: 2px solid var(--border-color);
     background: transparent;
     position: relative;
-    flex-shrink: 0;
+    flex-shrink: 0; // Prevent resizing
     transition: all 0.25s ease;
     opacity: 1;
     visibility: visible;
@@ -298,7 +344,7 @@
 
   .select-option:hover .select-check {
     border-color: var(--accent-color);
-    transform: scale(1.05);
+    transform: scale(1.05); // Slightly larger on hover
   }
 
   .select-option--selected .select-check {
@@ -307,21 +353,35 @@
     transform: scale(1.05);
   }
 
+  // Checkmark icon inside the box/circle
   .select-option--selected .select-check::after {
-    content: '\f00c';
+    content: '\f00c'; // Font Awesome check
     font-family: 'Font Awesome 6 Free';
     font-weight: 900;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: var(--card-bg, #fff);
+    // Ensure high contrast for checkmark
+    color: var(--card-bg, #fff); // Use card background (usually white/light) for contrast
     font-size: 10px;
     animation: checkmark 0.3s ease;
     opacity: 1;
     visibility: visible;
     z-index: 2;
   }
+
+  // Ensure contrast works in dark mode too
+  [data-theme='dark'] .select-option--selected .select-check::after {
+    color: var(--card-bg); // Dark mode card background
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) .select-option--selected .select-check::after {
+      color: var(--card-bg); // Dark mode card background
+    }
+  }
+
 
   @keyframes checkmark {
     0% {
@@ -339,19 +399,23 @@
     }
   }
 
-  // Empty, Count, Selected items styles
+  // Empty state message
   .select-empty {
     padding: 1.2rem;
     text-align: center;
     color: var(--text-color-secondary);
     font-style: italic;
-    background: inherit;
+    background: inherit; // Match options container background
   }
 
+  // Selected count block styles
   .select-count {
     padding: 0.6rem 1rem;
     border-bottom: 1px solid var(--border-color);
-    background: inherit;
+    background: inherit; // Match options container background
+    // Optional: Add subtle background if needed for visual separation
+    // background: var(--input-bg);
+    // border-radius: 8px 8px 0 0; // Only if sticky or always visible
   }
 
   .select-count-title {
@@ -371,13 +435,14 @@
     border-radius: 12px;
   }
 
+  // Selected items (badges) block styles
   .select-selected-items {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
     padding: 0.7rem 1rem;
     border-bottom: 1px solid var(--border-color);
-    background: inherit;
+    background: inherit; // Match options container background
   }
 
   .select-selected-item {
@@ -385,7 +450,7 @@
     align-items: center;
     background: var(--input-bg);
     border: 1px solid var(--border-color);
-    border-radius: 16px;
+    border-radius: 16px; // Pill shape
     padding: 0.3rem 0.7rem;
     font-size: 0.85rem;
     color: var(--text-color);
@@ -394,41 +459,84 @@
   }
 
   .select-selected-item:hover {
-    border-color: var(--accent-color);
+    border-color: var(--accent-color); // Accent border on hover
     box-shadow: 0 2px 4px var(--box-shadow-hover-color);
   }
 
   .select-selected-item-text {
     margin-right: 0.5rem;
+    max-width: 120px; // Limit width to prevent huge badges
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
+  // --- UPDATED: Remove Button Styles ---
   .select-selected-item-remove {
+    // --- Base styles ---
     cursor: pointer;
-    color: var(--text-color-secondary);
-    font-size: 0.8rem;
-    transition: all 0.2s ease;
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    display: flex;
+    color: var(--text-color-secondary); // Use secondary text color
+    font-size: 0.8rem; // Match example font size
+    transition: all 0.2s ease; // Match example transition
+    border-radius: 50%; // Make it circular
+    width: 16px; // Match example size
+    height: 16px; // Match example size
+    display: flex; // Use flexbox for centering icon
     align-items: center;
     justify-content: center;
-    margin-left: auto;
+    margin-left: auto; // Push to the right if needed, or adjust parent gap
+    background: transparent; // Ensure no button background initially
+    border: none; // Ensure no button border initially
+    padding: 0; // Ensure no button padding initially
+
+    // --- Hover styles from example ---
+    &:hover {
+      color: var(--accent-color); // Accent color on hover
+      background: var(--accent-light); // Light accent background on hover
+      transform: rotate(90deg); // Rotate effect on hover
+    }
+
+    // --- Ensure icon inside is centered ---
+    i {
+      line-height: 1; // Prevent extra space around icon
+      display: block; // Helps with centering sometimes
+    }
   }
 
-  .select-selected-item-remove:hover {
-    color: var(--accent-color);
-    background: var(--accent-light);
-    transform: rotate(90deg);
-  }
+  // --- END UPDATED ---
 
-  // Error state
+
+  // Error state styling
   &.select--error .select-header {
-    border-color: var(--error-color);
-    box-shadow: 0 0 0 3px var(--error-focus);
+    border-color: var(--error-color) !important; // Ensure override
+    box-shadow: 0 0 0 3px var(--error-focus) !important; // Ensure override
+  }
+
+  &.select--error .select-header::after {
+    color: var(--error-color); // Make chevron red in error state
+  }
+
+  // Shake animation for badge removal attempt when minSelections reached
+  .select-selected-item--shake {
+    animation: shakeBadge 0.4s linear;
+  }
+
+  @keyframes shakeBadge {
+
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+
+    20%,
+    60% {
+      transform: translateX(-3px);
+    }
+
+    40%,
+    80% {
+      transform: translateX(3px);
+    }
   }
 
 }
