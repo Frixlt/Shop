@@ -67,7 +67,18 @@ $card-gap: 10px;
   --input-bg: #{$gray-light}; // Background for text inputs, select header
   --input-focus: rgba(var(--accent-color-rgb), 0.25); // Focus ring color
   --error-color: #{$red}; // Errors
-  --error-focus: rgba(220, 53, 69, 0.25); // Error focus ring
+  --error-color-rgb: 220, 53, 69; // RGB for error focus
+  --error-focus: rgba(var(--error-color-rgb), 0.25); // Error focus ring
+
+  // --- NEW: Checkbox Variables ---
+  --checkbox-size: 1.15rem; // Немного уменьшим для соответствия тексту
+  --checkbox-border-width: 2px;
+  --checkbox-bg: #f8f9fa; // Светлый фон
+  --checkbox-border-color: var(--border-color); // Используем общую границу
+  --checkbox-checked-bg: var(--accent-color); // Акцентный цвет для фона
+  --checkbox-checked-color: #{$white}; // Цвет галочки
+  --checkbox-focus-shadow: 0 0 0 3px rgba(var(--primary-color), 0.25); // Тень фокуса, как у селекта
+  --checkbox-error-shadow: 0 0 0 2px rgba(var(--error-color-rgb), 0.25); // Тень при ошибке
 
   // Shadows & Transitions
   --box-shadow-color: rgba(0, 0, 0, 0.05); // General shadows
@@ -116,15 +127,20 @@ $card-gap: 10px;
   --border-color: #444444; // Darker border
 
   // Accents & Links (Accent remains green, hover adjusted)
-  // --primary-color: #some_light_blue; // Adjust if needed
   --accent-hover: #1eb069;
   --accent-light: rgba(25, 135, 84, 0.2); // Slightly more opaque light accent
 
   // Forms & Inputs
   --input-bg: #2a2a2a; // ** Darker input/select header bg **
   --input-focus: rgba(var(--accent-color-rgb), 0.4); // More visible focus ring
-  // --error-color: #f8d7da; // Lighter red for errors might be needed
-  --error-focus: rgba(220, 53, 69, 0.4);
+  --error-focus: rgba(var(--error-color-rgb), 0.4);
+
+  // --- NEW: Dark Theme Checkbox Variables ---
+  --checkbox-bg: #2a2a2a; // Темный фон
+  --checkbox-border-color: #555555; // Более темная граница
+  --checkbox-checked-color: #1e1e1e; // Цвет галочки (может быть фон карточки)
+  --checkbox-focus-shadow: 0 0 0 3px rgba(var(--primary-color), 0.3); // Тень фокуса темнее
+  --checkbox-error-shadow: 0 0 0 2px rgba(var(--error-color-rgb), 0.4); // Тень ошибки темнее
 
   // Shadows & Transitions
   --box-shadow-color: rgba(0, 0, 0, 0.2); // More prominent shadow
@@ -133,8 +149,6 @@ $card-gap: 10px;
   // Header Specific
   --header-search-bg: #2a2a2a;
   --header-search-text: #e0e0e0;
-  // --header-cart-count-bg: #f8d7da; // Adjust if needed
-  // --header-cart-count-text: #{$red};
 
   // Footer Specific
   --footer-divider: rgba(255, 255, 255, 0.1);
@@ -151,7 +165,6 @@ $card-gap: 10px;
   --logo-path-4: #{$logo-path-4-dark};
   --logo-path-5: #{$logo-path-5-dark};
   --logo-path-6: #{$logo-path-6-dark};
-  // --logo-svg: url('...'); // Update SVG data URI if needed for dark theme logo
 }
 
 
@@ -165,7 +178,7 @@ $card-gap: 10px;
     // Basic Layout & Text
     --body-bg: #121212;
     --section-bg: #121212;
-    --card-bg: #1e1e1e; // ** Dropdown background **
+    --card-bg: #1e1e1e;
     --footer-bg: #1a1a1a;
     --text-color: #e0e0e0;
     --text-color-secondary: #aaaaaa;
@@ -176,9 +189,16 @@ $card-gap: 10px;
     --accent-light: rgba(25, 135, 84, 0.2);
 
     // Forms & Inputs
-    --input-bg: #2a2a2a; // ** Select header background **
+    --input-bg: #2a2a2a;
     --input-focus: rgba(var(--accent-color-rgb), 0.4);
-    --error-focus: rgba(220, 53, 69, 0.4);
+    --error-focus: rgba(var(--error-color-rgb), 0.4);
+
+    // --- NEW: System Dark Theme Checkbox Variables ---
+    --checkbox-bg: #2a2a2a;
+    --checkbox-border-color: #555555;
+    --checkbox-checked-color: #1e1e1e;
+    --checkbox-focus-shadow: 0 0 0 3px rgba(var(--primary-color), 0.3);
+    --checkbox-error-shadow: 0 0 0 2px rgba(var(--error-color-rgb), 0.4);
 
     // Shadows & Transitions
     --box-shadow-color: rgba(0, 0, 0, 0.2);

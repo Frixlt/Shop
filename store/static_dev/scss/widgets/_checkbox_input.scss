@@ -1,0 +1,171 @@
+// --"--\Catalog\store\static_dev\scss\widgets\_checkbox_input.scss"--
+
+// УЛУЧШЕННЫЕ СТИЛИ ДЛЯ ЧЕКБОКСА
+
+.checkbox-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem; // Уменьшили отступ между чекбоксом и label
+  padding-bottom: 0px; // Оставляем место для ошибки (можно уменьшить до 1.5rem, если кажется много)
+  position: relative; // Для позиционирования ошибки
+  flex-wrap: wrap;
+}
+
+/* Скрываем стандартный чекбокс */
+.checkbox-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+}
+
+/* Контейнер для кастомного чекбокса и его позиционирования */
+.checkbox-custom-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--checkbox-size);
+  height: var(--checkbox-size);
+  flex-shrink: 0;
+  margin-top: 0.15rem; // Небольшой сдвиг для лучшего выравнивания с текстом
+}
+
+/* Кастомный внешний вид чекбокса */
+.checkbox-custom {
+  display: block;
+  width: var(--checkbox-size);
+  height: var(--checkbox-size);
+  border: var(--checkbox-border-width) solid var(--checkbox-border-color);
+  border-radius: 4px;
+  background-color: var(--checkbox-bg);
+  position: relative;
+  transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
+  cursor: pointer;
+}
+
+/* Стиль для отмеченного состояния */
+.checkbox-input:checked+.checkbox-custom {
+  background-color: var(--checkbox-checked-bg);
+  border-color: var(--checkbox-checked-bg);
+}
+
+/* Иконка "галочка" внутри */
+.checkbox-input:checked+.checkbox-custom::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  width: 30%;
+  height: 60%;
+  border: solid var(--checkbox-checked-color);
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* Стиль для фокуса (когда выбран через Tab) */
+.checkbox-input:focus-visible+.checkbox-custom {
+  outline: none;
+  box-shadow: var(--checkbox-focus-shadow);
+}
+
+/* Стиль для метки */
+.checkbox-label {
+  font-size: 0.95rem;
+  color: var(--text-color);
+  cursor: pointer;
+  flex: 1;
+  user-select: none;
+  line-height: 1.5;
+  margin-bottom: 0px;
+  width: 100%;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  // display: inline; // Попробуем сделать label тоже inline, чтобы он лучше обтекал
+
+  // Стили для ссылок внутри метки
+  .auth-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color var(--transition-speed) ease;
+    font-weight: 500;
+    margin: 0 0.1rem; // Можно чуть уменьшить отступы у ссылок
+    display: inline;
+    vertical-align: baseline; // Выравнивание ссылок
+  }
+
+  .auth-link:hover {
+    color: var(--accent-color);
+    text-decoration: underline;
+  }
+
+  // --- UPDATED: Required Indicator Styling ---
+  .required-indicator {
+    color: var(--error-color, #dc3545);
+    font-weight: bold;
+    display: inline; // Оставляем inline
+    padding: 0; // Явно убираем padding
+    margin: 0; // Явно убираем margin
+    vertical-align: baseline; // Пробуем выровнять по базовой линии текста
+    /* Или попробуйте top/middle, если baseline не сработает как надо */
+    /* vertical-align: top; */
+    /* vertical-align: middle; */
+  }
+
+  // --- END UPDATED ---
+}
+
+/* Стилизация блока ошибки */
+.checkbox-field .form-error {
+  position: relative;
+  bottom: 0;
+  left: 0;
+  font-size: 0.85rem;
+  color: var(--error-color);
+  display: none;
+  margin-top: 0;
+  min-height: auto;
+  width: 100%;
+  font-weight: 500;
+  margin-top: 0.2rem;
+  padding: 0.2rem 0;
+  transition: opacity var(--transition-speed) ease;
+
+  &.shake {
+    animation: shake 0.4s linear;
+  }
+}
+
+/* Стилизация при ошибке */
+.checkbox-field.error {
+  .checkbox-custom {
+    border-color: var(--error-color);
+    box-shadow: var(--checkbox-error-shadow);
+  }
+
+  .checkbox-input:focus-visible+.checkbox-custom {
+    box-shadow: var(--checkbox-error-shadow);
+  }
+}
+
+// --- Shake animation ---
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20%,
+  60% {
+    transform: translateX(-3px);
+  }
+
+  40%,
+  80% {
+    transform: translateX(3px);
+  }
+}

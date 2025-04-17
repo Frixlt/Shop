@@ -1,3 +1,4 @@
+// --"--\Catalog\store\static_dev\scss\users.scss"--
 // Зависимости для страницы users (авторизация и т.д.)
 
 // Общие переменные и базовые стили
@@ -17,6 +18,7 @@
 // Виджеты, используемые на странице users
 @import 'widgets/text_input'; // Стили для кастомного поля ввода
 @import 'widgets/select_input';
+@import 'widgets/checkbox_input'; // <--- ДОБАВЛЕН ИМПОРТ
 
 // {WIP} Утилиты
 @import 'modules/show-grid';

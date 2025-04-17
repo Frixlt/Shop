@@ -1,6 +1,8 @@
+# --"--\Catalog\store\apps\users\forms.py"--
 import django.core.exceptions
 import django.forms
 from django.utils.translation import gettext_lazy as _
+from django.utils.safestring import mark_safe  # Импортируем mark_safe
 
 import apps.core.widgets
 
@@ -19,6 +21,7 @@ class BaseForm(django.forms.Form):
                     apps.core.widgets.TextInput,
                     apps.core.widgets.PasswordInput,
                     apps.core.widgets.SelectInput,
+                    apps.core.widgets.CheckboxInput,  # Добавляем CheckboxInput
                 ),
             ):
                 widget.label = field.label
@@ -169,10 +172,30 @@ class TestAuthForm(BaseForm):
         },
     )
 
+    # --- CORRECTED FIELD: Removed   ---
+    terms_agreement = django.forms.BooleanField(
+        label=mark_safe(
+            _(
+                'I accept the <a href="#" class="auth-link">terms of use</a>&nbsp;and&nbsp;<a href="#"'
+                ' class="auth-link">privacy policy</a>'
+            )
+        ),
+        required=True,
+        widget=apps.core.widgets.CheckboxInput(
+            attrs={
+                "data-required-message": _("You must accept the terms and conditions."),
+            }
+        ),
+        error_messages={
+            "required": _("You must accept the terms and conditions."),
+        },
+    )
+    # --- END CORRECTION ---
+
     def clean_phone(self):
         phone = self.cleaned_data.get("phone")
         if phone:
-            cleaned_phone = "".join(d for d in phone if d.isdigit())
+            cleaned_phone = "".join(digit for digit in phone if digit.isdigit())
             if len(cleaned_phone) > 0 and len(cleaned_phone) < 10:
                 raise django.core.exceptions.ValidationError(
                     _("Phone number seems too short."),
@@ -195,12 +218,13 @@ class TestAuthForm(BaseForm):
     def clean(self):
         cleaned_data = super().clean()
         fruits = cleaned_data.get("favorite_fruits")
-        max_fruits_config = getattr(self.fields["favorite_fruits"].widget, "config", {})
-        max_fruits = max_fruits_config.get("maxSelections", 3)
-        if fruits and len(fruits) > max_fruits:
-            self.add_error(
-                "favorite_fruits",
-                _("Please select no more than {count} fruits.").format(count=max_fruits),
-            )
+        if fruits:  # Проверяем, что fruits существует
+            max_fruits_config = getattr(self.fields["favorite_fruits"].widget, "config", {})
+            max_fruits = max_fruits_config.get("maxSelections", 3)
+            if len(fruits) > max_fruits:
+                self.add_error(
+                    "favorite_fruits",
+                    _("Please select no more than {count} fruits.").format(count=max_fruits),
+                )
 
         return cleaned_data

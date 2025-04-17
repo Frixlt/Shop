@@ -148,18 +148,29 @@
     animation-delay: 0.35s;
   }
 
+  &:nth-child(8) {
+    animation-delay: 0.4s;
+  }
+
+  &:nth-child(9) {
+    animation-delay: 0.45s;
+  }
+
+  &:nth-child(10) {
+    animation-delay: 0.5s;
+  }
+
   // Можно добавить еще
   // --- Конец Стилей Анимации ---
 
-  // Уменьшаем отступ для групп радио/чекбоксов (остается как есть)
-  &:has(.radio-group),
-  &.checkbox-field {
+  // Уменьшаем отступ для групп радио (чекбокс имеет свой отступ)
+  // Удаляем .checkbox-field из этого правила
+  &:has(.radio-group) {
     margin-bottom: 0.8rem;
   }
 
   // --- Стили для Label (применяются ко всем) ---
   label {
-    display: flex; // Используем flex для выравнивания индикаторов
     align-items: center;
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
@@ -168,8 +179,8 @@
     position: relative; // Для ::after эффекта
 
     // Эффект подчеркивания (для TextInput/PasswordInput)
-    // НЕ применяем к label для селекта или радио/чекбоксов
-    // Используем :not() чтобы исключить кастомный селект и другие типы
+    // НЕ применяем к label для селекта, радио, чекбоксов
+    // Используем :not() чтобы исключить
     &:not(.radio-group-label):not(.radio-label):not(.checkbox-label):not([for^="custom_id_"]) {
 
       // Исключаем label для custom select
@@ -246,9 +257,10 @@
 // Пример:
 // @import 'widgets/text_input';
 // @import 'widgets/select_input';
+// @import 'widgets/checkbox_input';
 
 
-// --- Остальные стили форм (Auth Button, Links, Checkbox, Radio и т.д.) ---
+// --- Остальные стили форм (Auth Button, Links, Radio и т.д.) ---
 .auth-button {
   width: 100%;
   padding: 0.9rem 1.5rem;
@@ -349,55 +361,19 @@
   color: var(--text-color-secondary);
 }
 
-// Стили для нативных radio/checkbox, если они используются напрямую
-.checkbox-field {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.8rem;
-}
+// --- УДАЛЕНЫ СТИЛИ ДЛЯ CHECKBOX отсюда ---
 
-.checkbox-input {
-  margin: 0;
-  cursor: pointer;
-  accent-color: var(--accent-color);
-  width: 1rem;
-  height: 1rem;
-  flex-shrink: 0;
-}
-
-.checkbox-label {
-  font-size: 0.9rem;
-  color: var(--text-color-secondary);
-  cursor: pointer;
-  flex: 1;
-  user-select: none;
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px;
-  line-height: 1.4;
-  margin-bottom: 0;
-
-  .auth-link {
-    font-size: inherit;
-    line-height: inherit;
-  }
-}
-
-.checkbox-text {
-  color: var(--text-color-secondary);
-}
-
+// --- Стили для RADIO ---
 .radio-group {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.3rem; // Отступ между опциями
+  // Отступ под группой управляется через .form-field:has(.radio-group)
 }
 
 .radio-group-label {
-  display: block;
-  margin-bottom: 0.3rem;
+  display: block; // Отдельная строка
+  margin-bottom: 0.5rem; // Отступ до первой опции
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--text-color-secondary);
@@ -405,16 +381,15 @@
 
 .radio-field {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.2rem;
+  align-items: center; // Центрирование по вертикали
+  gap: 0.5rem; // Отступ между input и label
+  margin-bottom: 0.2rem; // Небольшой отступ между радио-полями
 }
 
-// Немного уменьшен отступ
 .radio-input {
-  margin: 0;
+  margin: 0; // Убираем стандартные отступы
   cursor: pointer;
-  accent-color: var(--accent-color);
+  accent-color: var(--accent-color); // Цвет активного состояния
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
@@ -425,8 +400,8 @@
   color: var(--text-color-secondary);
   cursor: pointer;
   user-select: none;
-  line-height: normal;
-  margin-bottom: 0;
+  line-height: normal; // Лучшее выравнивание
+  margin-bottom: 0; // Убираем стандартный отступ
 }
 
 // Button-like Radio Inputs
@@ -448,7 +423,7 @@
   margin-bottom: 0;
 }
 
-// .radio-input { скрытый }
+// Скрываем нативный input
 .radio-input[type="radio"] {
   position: absolute;
   opacity: 0;
@@ -457,7 +432,7 @@
   width: 0;
 }
 
-// Уточняем селектор для скрытия
+// Стилизация кастомной кнопки
 .radio-btn {
   display: inline-flex;
   align-items: center;
@@ -492,6 +467,9 @@
 .radio-input:focus+.radio-btn {
   box-shadow: 0 0 0 3px var(--input-focus);
 }
+
+// --- КОНЕЦ СТИЛЕЙ RADIO ---
+
 
 // Form Success Message
 .form-success {
@@ -532,7 +510,6 @@
     gap: 1rem;
   }
 
-  // .auth-form { padding: 0; } // Убрано, т.к. паддинг у контейнера
 }
 
 @media screen and (max-width: 480px) {
@@ -553,8 +530,6 @@
     position: relative;
   }
 
-  // .auth-tab:last-child { border-bottom: none; } // Убрано, рамка нужна для всех в колонке
-  // .auth-tab.active { border-bottom-color: transparent; } // Убрано, можно добавить другой индикатор если нужно
   .tab-indicator {
     display: none;
   }
@@ -563,7 +538,11 @@
     margin-bottom: 1rem;
   }
 
-  // Немного уменьшаем отступ на мобилках
+  // Адаптивность для чекбокса не требует особых изменений здесь,
+  // так как стили уже гибкие.
+  // .form-field.checkbox-field { ... }
+  // .checkbox-field + .form-error { ... }
+
   .auth-button {
     font-size: 0.9rem;
   }
@@ -584,6 +563,7 @@
   }
 }
 
+// Повышаем z-index для открытого селекта
 .form-field:has(.select--open) {
   z-index: 20;
 }

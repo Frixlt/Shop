@@ -4,6 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 import django.forms.widgets
 from django.utils.encoding import force_str
 from django.utils.functional import Promise
+from django.utils.safestring import mark_safe  # Импортируем mark_safe
 
 __all__ = ()
 
@@ -172,5 +173,42 @@ class SelectInput(django.forms.widgets.Select):
         if self.allow_multiple_selected:
             if not isinstance(widget_context["value"], (list, tuple, set)):
                 widget_context["value"] = [widget_context["value"]] if widget_context["value"] is not None else []
+
+        return context
+
+
+class CheckboxInput(django.forms.widgets.CheckboxInput):
+    """
+    Кастомный виджет для чекбокса, использующий отдельный шаблон.
+    """
+
+    template_name = "widgets/checkbox_input.html"
+    label = None
+    is_required = False
+
+    def get_context(self, name, value, attrs):
+        # Вызываем родительский метод для получения базового контекста
+        context = super().get_context(name, value, attrs)
+        widget_context = context["widget"]
+
+        # Добавляем наши кастомные переменные
+        widget_context["label"] = getattr(self, "label", None)
+        widget_context["is_required"] = getattr(self, "is_required", False)
+
+        # Убеждаемся, что ID присутствует в attrs для использования в шаблоне
+        final_attrs = widget_context.get("attrs", {})
+        if "id" not in final_attrs:
+            final_attrs["id"] = attrs.get("id", f"id_{name}")
+
+        widget_context["attrs"] = final_attrs
+
+        # Используем mark_safe для label, если он содержит HTML
+        # Django автоматически экранирует строки, передаваемые в шаблон.
+        # Если мы хотим рендерить HTML (например, ссылки в label),
+        # нам нужно явно пометить строку как безопасную.
+        if isinstance(widget_context["label"], str) and (
+            "<" in widget_context["label"] or ">" in widget_context["label"]
+        ):
+            widget_context["label"] = mark_safe(widget_context["label"])
 
         return context
