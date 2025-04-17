@@ -4,15 +4,27 @@ import { initAllCustomSelects } from "./select_input.js";
 import { initCheckboxes, validateCheckbox } from "./checkbox_input.js";
 
 function validateCustomSelect(widgetContainer) {
-  if (!widgetContainer || !widgetContainer.widgetInstance || !widgetContainer.dataset.nativeSelectId) { return true; }
-  if (widgetContainer.classList.contains('select--open')) { return true; }
-  const instance = widgetContainer.widgetInstance;
-  const config = instance.config;
+  // Added checks for existence before accessing properties
+  if (!widgetContainer || !widgetContainer.dataset.nativeSelectId) { return true; }
+
+  const instance = widgetContainer.widgetInstance; // May be undefined if not yet initialized
+  const config = instance?.config; // Use optional chaining
   const nativeSelectId = widgetContainer.dataset.nativeSelectId;
   const nativeSelect = document.getElementById(nativeSelectId);
   const errorElementId = `${nativeSelectId}-error`;
   const errorElement = document.getElementById(errorElementId);
-  if (!instance || !config || !nativeSelect || !errorElement) { return true; }
+
+  // Validate required elements exist
+  if (!nativeSelect || !errorElement) {
+    console.warn(`validateCustomSelect: Missing native select or error element for ${nativeSelectId}`);
+    return true; // Cannot validate without these
+  }
+  // Don't validate if the select is open or not fully initialized
+  if (widgetContainer.classList.contains('select--open') || !instance || !config) {
+    return true;
+  }
+
+
   const minSelections = config.minSelections || 0;
   const requiredMessage = widgetContainer.dataset.requiredMessage || nativeSelect.dataset.requiredMessage || "Это поле обязательно для заполнения.";
   const minSelectionsMessageTemplate = config.minSelectionsMessage || 'Выберите минимум {min} элемент(а/ов)';
@@ -20,6 +32,8 @@ function validateCustomSelect(widgetContainer) {
   const selectedCount = selectedOptions.length;
   let isValid = true;
   let errorMessage = "";
+
+  // Perform validation checks
   if (nativeSelect.hasAttribute('required') && minSelections <= 1 && selectedCount === 0) {
     isValid = false;
     errorMessage = requiredMessage;
@@ -27,6 +41,8 @@ function validateCustomSelect(widgetContainer) {
     isValid = false;
     errorMessage = minSelectionsMessageTemplate.replace('{min}', minSelections);
   }
+
+  // Update UI based on validation result
   widgetContainer.classList.toggle('select--error', !isValid);
   if (!isValid) {
     errorElement.textContent = errorMessage;
@@ -40,6 +56,7 @@ function validateCustomSelect(widgetContainer) {
   }
   return isValid;
 }
+
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM Content Loaded. Initializing widgets...");
@@ -83,6 +100,8 @@ document.addEventListener("DOMContentLoaded", () => {
               const customWidget = element.closest('.django-custom-select-widget');
               if (customWidget?.classList.contains('select--open') && customWidget.widgetInstance) {
                 customWidget.widgetInstance.close();
+                // Optionally, you might want to validate after closing via Enter
+                // validateCustomSelect(customWidget);
               }
             }
             if (proceedToNextField) {
@@ -116,19 +135,24 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    // --- MODIFIED FOCUSOUT FOR SELECT ---
     form.querySelectorAll('.django-custom-select-widget').forEach(widgetContainer => {
       widgetContainer.addEventListener('focusout', (event) => {
+        // Check if focus is moving outside the entire widget container
         if (!widgetContainer.contains(event.relatedTarget)) {
+          // Use a small delay to allow internal clicks (like option selection) to process
           setTimeout(() => {
-            if (widgetContainer.classList.contains('select--open') && widgetContainer.widgetInstance) {
-              widgetContainer.widgetInstance.close();
-            } else {
+            // Check if the select is still open AFTER the delay.
+            // If it IS open, do nothing here - let the document click listener handle closing.
+            // If it's already closed (e.g., user tabbed away without opening), THEN validate.
+            if (!widgetContainer.classList.contains('select--open')) {
               validateCustomSelect(widgetContainer);
             }
-          }, 100); // Delay to allow option click to process
+          }, 50); // Delay slightly reduced, adjust if needed
         }
       });
     });
+    // --- END MODIFIED FOCUSOUT FOR SELECT ---
 
     form.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -171,13 +195,13 @@ document.addEventListener("DOMContentLoaded", () => {
       form.querySelectorAll(".checkbox-input").forEach(checkbox => {
         const fieldContainer = checkbox.closest('.checkbox-field');
         if (fieldContainer) {
+          fieldContainer.classList.remove('error'); // Reset visual state
           const errorElement = fieldContainer.querySelector('.form-error');
           if (errorElement) {
             errorElement.textContent = '';
             errorElement.style.display = 'none';
             errorElement.classList.remove('shake');
           }
-          fieldContainer.classList.remove('error');
         }
       });
 
@@ -189,23 +213,29 @@ document.addEventListener("DOMContentLoaded", () => {
             currentFieldIsValid = false;
           }
         } else if (element.matches('.django-custom-select-widget')) {
+          // Pass the widget container itself to the validation function
           if (!validateCustomSelect(element)) {
             currentFieldIsValid = false;
           }
-        } else if (element.matches('.checkbox-input') && element.required) {
-          if (!validateCheckbox(element)) {
+        } else if (element.matches('.checkbox-input')) {
+          // Validate checkbox (especially if required)
+          if (element.required && !validateCheckbox(element)) {
             currentFieldIsValid = false;
           }
+          // If checkbox is not required, validateCheckbox should return true
+          // If you want to validate non-required checkboxes for some reason, adjust logic
         }
+
         if (!currentFieldIsValid && !firstInvalidElement) {
           firstInvalidElement = element.matches('.django-custom-select-widget')
-            ? element.querySelector('.select-header') || element
+            ? element.querySelector('.select-header') || element // Focus header for select
             : element.matches('.checkbox-input')
-              ? element.closest('.checkbox-field')?.querySelector('.checkbox-custom') || element
-              : element;
+              ? element.closest('.checkbox-field')?.querySelector('.checkbox-custom') || element // Focus custom element for checkbox
+              : element; // Default to the element itself
         }
         isFormValid = isFormValid && currentFieldIsValid;
       });
+
 
       if (!isFormValid) {
         console.log("Form is invalid on client-side. First invalid:", firstInvalidElement?.id || firstInvalidElement);
@@ -216,12 +246,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (firstInvalidElement) {
           const elementToFocus = firstInvalidElement.matches('.checkbox-custom') ? firstInvalidElement : firstInvalidElement;
           elementToFocus.focus();
+          // Scroll the field itself (or its wrapper) into view
           const elementToScroll = elementToFocus.closest('.form-field') || elementToFocus;
           console.log("Scrolling to:", elementToScroll);
           elementToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-        return;
+        return; // Stop submission
       }
+
 
       console.log("Form is valid. Proceeding with AJAX...");
       if (submitButton) {
@@ -286,17 +318,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (element.matches('.auth-input, .auth-textarea') && element.id && window.textInputInstances[element.id]) {
                   window.textInputInstances[element.id].reset();
                 } else if (element.matches('.django-custom-select-widget') && element.widgetInstance) {
-                  element.widgetInstance.resetState();
+                  element.widgetInstance.resetState(); // Assuming a resetState method exists
                 } else if (element.matches('.checkbox-input')) {
                   const fieldContainer = element.closest('.checkbox-field');
                   if (fieldContainer) {
+                    fieldContainer.classList.remove('error'); // Reset visual state
                     const errorElement = fieldContainer.querySelector('.form-error');
                     if (errorElement) {
                       errorElement.textContent = '';
                       errorElement.style.display = 'none';
                       errorElement.classList.remove('shake');
                     }
-                    fieldContainer.classList.remove('error');
                   }
                 }
               });
@@ -325,63 +357,77 @@ document.addEventListener("DOMContentLoaded", () => {
                   genericErrorDiv.style.display = 'block';
                   if (!firstInvalidElement) firstInvalidElement = genericErrorDiv;
                 }
-                return;
+                return; // Skip to next error
               }
 
+              // Handle Text/Password/Textarea inputs
               if (field?.matches('.auth-input, .auth-textarea') && field.id && window.textInputInstances[field.id]) {
                 window.textInputInstances[field.id].setError(errorMessage);
                 if (!firstInvalidElement) firstInvalidElement = field;
                 errorHandled = true;
-              } else if (field?.matches('.django-select-input-native')) {
-                const nId = field.id;
-                const wCont = document.querySelector(`.django-custom-select-widget[data-native-select-id="${nId}"]`);
-                const errEl = document.getElementById(`${nId}-error`);
-                if (wCont && errEl) {
-                  wCont.classList.add('select--error');
-                  errEl.textContent = errorMessage;
-                  errEl.style.display = 'block';
-                  errEl.classList.add('shake');
-                  setTimeout(() => errEl.classList.remove('shake'), 400);
-                  if (!firstInvalidElement) firstInvalidElement = wCont.querySelector('.select-header') || wCont;
+              }
+              // Handle Custom Select inputs
+              else if (field?.matches('.django-select-input-native')) {
+                const nativeId = field.id;
+                const widgetContainer = document.querySelector(`.django-custom-select-widget[data-native-select-id="${nativeId}"]`);
+                const errorElement = document.getElementById(`${nativeId}-error`);
+                if (widgetContainer && errorElement) {
+                  widgetContainer.classList.add('select--error');
+                  errorElement.textContent = errorMessage;
+                  errorElement.style.display = 'block';
+                  errorElement.classList.add('shake');
+                  setTimeout(() => errorElement.classList.remove('shake'), 400);
+                  if (!firstInvalidElement) firstInvalidElement = widgetContainer.querySelector('.select-header') || widgetContainer;
                   errorHandled = true;
                 } else {
-                  console.warn(`Server Error: Cannot find elements for select field '${fieldName}' (Native ID: ${nId})`);
+                  console.warn(`Server Error: Cannot find custom select elements for field '${fieldName}' (Native ID: ${nativeId})`);
                 }
-              } else if (field?.matches('.checkbox-input')) {
+              }
+              // Handle Checkbox inputs
+              else if (field?.matches('.checkbox-input')) {
                 const fieldContainer = field.closest('.checkbox-field');
                 if (fieldContainer) {
                   const errorElement = fieldContainer.querySelector('.form-error');
                   if (errorElement) {
+                    fieldContainer.classList.add('error');
                     errorElement.textContent = errorMessage;
                     errorElement.style.display = 'block';
                     errorElement.classList.add('shake');
                     setTimeout(() => errorElement.classList.remove('shake'), 400);
-                    fieldContainer.classList.add('error');
                     if (!firstInvalidElement) firstInvalidElement = fieldContainer.querySelector('.checkbox-custom') || field;
                     errorHandled = true;
                   } else {
-                    console.warn(`Server Error: Cannot find error element inside for checkbox '${fieldName}'`);
+                    console.warn(`Server Error: Cannot find error element inside '.checkbox-field' for checkbox '${fieldName}'`);
                   }
+                } else {
+                  console.warn(`Server Error: Cannot find '.checkbox-field' container for checkbox '${fieldName}'`);
                 }
               }
+
+              // Fallback to generic error display if not handled by specific widgets
               if (!errorHandled && genericErrorDiv && !genericErrorDiv.textContent.includes(errorMessage)) {
                 genericErrorDiv.textContent += `${fieldName}: ${errorMessage} `;
                 genericErrorDiv.style.display = 'block';
                 if (!firstInvalidElement) firstInvalidElement = genericErrorDiv;
               }
             });
+
             form.classList.add("animate__animated", "animate__shakeX");
             setTimeout(() => form.classList.remove("animate__animated", "animate__shakeX"), 600);
+
             if (firstInvalidElement) {
-              firstInvalidElement.focus();
+              const elementToFocus = firstInvalidElement.matches('.checkbox-custom') ? firstInvalidElement : firstInvalidElement;
+              elementToFocus.focus();
               const elToScroll = firstInvalidElement.closest('.form-field') || firstInvalidElement;
               elToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
+
             if (submitButton) {
               submitButton.innerHTML = originalButtonHTML;
               submitButton.disabled = false;
             }
           } else {
+            // --- Handle Generic/Server/Network Errors ---
             let finalErrorMessage = "Произошла непредвиденная ошибка.";
             if (data?.error) {
               finalErrorMessage = data.error + (data.details ? ` (${data.details})` : '');
@@ -406,10 +452,11 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .finally(() => {
           console.log("AJAX request finished.");
+          // Ensure button is re-enabled if it's still disabled AND success message isn't showing
           if (submitButton && submitButton.disabled && !(successDiv?.classList.contains('active'))) {
             submitButton.disabled = false;
             submitButton.innerHTML = originalButtonHTML;
-            submitButton.style.backgroundColor = "";
+            submitButton.style.backgroundColor = ""; // Reset potential success style
           }
         });
     });
