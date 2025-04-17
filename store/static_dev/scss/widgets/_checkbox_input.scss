@@ -73,6 +73,7 @@
 /* Стиль для метки */
 .checkbox-label {
   font-size: 0.95rem;
+  display: block;
   color: var(--text-color);
   cursor: pointer;
   flex: 1;

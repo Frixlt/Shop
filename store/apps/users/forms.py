@@ -4,8 +4,10 @@ import django.forms
 from django.utils.translation import gettext_lazy as _
 from django.utils.safestring import mark_safe  # Импортируем mark_safe
 
+# Import TextareaInput
 import apps.core.widgets
 
+# Add TextareaInput to __all__ if you want it exported from this module specifically
 __all__ = ()
 
 
@@ -15,13 +17,15 @@ class BaseForm(django.forms.Form):
         auto_id_format = self.auto_id
         for field_name, field in self.fields.items():
             widget = field.widget
+            # Add TextareaInput to the instance check
             if isinstance(
                 widget,
                 (
                     apps.core.widgets.TextInput,
                     apps.core.widgets.PasswordInput,
                     apps.core.widgets.SelectInput,
-                    apps.core.widgets.CheckboxInput,  # Добавляем CheckboxInput
+                    apps.core.widgets.CheckboxInput,
+                    apps.core.widgets.TextareaInput,  # <-- ADD HERE
                 ),
             ):
                 widget.label = field.label
@@ -142,7 +146,7 @@ class TestAuthForm(BaseForm):
         choices=FRUIT_CHOICES,
         widget=apps.core.widgets.SelectInput(
             config={
-                "min_selections": 0,
+                "min_selections": 1,  # Changed to 1 because field is required
                 "max_selections": 3,
                 "placeholder": _("Choose up to {maxSelections} fruits"),
                 "placeholderAllSelected": _("Maximum {maxSelections} fruits selected"),
@@ -168,29 +172,45 @@ class TestAuthForm(BaseForm):
             },
         ),
         error_messages={
-            "required": _("Please select at least one fruit."),
+            "required": _("Please select at least one fruit."),  # Use required for single error message
         },
     )
 
-    # --- CORRECTED FIELD: Removed   ---
+    # --- NEW Textarea Field ---
+    bio = django.forms.CharField(
+        label=_("About You"),
+        required=False,  # Example: make it optional
+        widget=apps.core.widgets.TextareaInput(
+            attrs={
+                "placeholder": _("Tell us a little about yourself..."),
+                "rows": 4,  # Suggest initial rows
+                "data-max-length": 500,  # Client-side validation hint
+                "data-max-length-message": _("Bio cannot exceed 500 characters."),  # Custom message
+            },
+            icon_class="fa-feather-alt",  # Example different icon
+        ),
+        max_length=500,  # Enforce server-side limit
+        help_text=_("Optional: Maximum 500 characters."),  # Optional help text
+    )
+    # --- END Textarea Field ---
+
     terms_agreement = django.forms.BooleanField(
         label=mark_safe(
             _(
-                'I accept the <a href="#" class="auth-link">terms of use</a>&nbsp;and&nbsp;<a href="#"'
-                ' class="auth-link">privacy policy</a>'
-            )
+                'I accept the <a href="#" class="auth-link">terms of use</a> and <a href="#"'
+                ' class="auth-link">privacy policy</a>',
+            ),
         ),
         required=True,
         widget=apps.core.widgets.CheckboxInput(
             attrs={
                 "data-required-message": _("You must accept the terms and conditions."),
-            }
+            },
         ),
         error_messages={
             "required": _("You must accept the terms and conditions."),
         },
     )
-    # --- END CORRECTION ---
 
     def clean_phone(self):
         phone = self.cleaned_data.get("phone")
@@ -218,13 +238,32 @@ class TestAuthForm(BaseForm):
     def clean(self):
         cleaned_data = super().clean()
         fruits = cleaned_data.get("favorite_fruits")
-        if fruits:  # Проверяем, что fruits существует
-            max_fruits_config = getattr(self.fields["favorite_fruits"].widget, "config", {})
-            max_fruits = max_fruits_config.get("maxSelections", 3)
-            if len(fruits) > max_fruits:
+        # Adjusted validation for favorite_fruits based on config
+        if fruits:
+            widget_config = self.fields["favorite_fruits"].widget.config
+            min_fruits = widget_config.get("minSelections", 0)
+            max_fruits = widget_config.get("maxSelections", 3)
+
+            if self.fields["favorite_fruits"].required and len(fruits) < 1:
+                # This is usually handled by the 'required' error message,
+                # but you could add a specific check if minSelections is > 1
+                # For now, we rely on the default required handling.
+                pass  # Let default required handle this
+            elif len(fruits) < min_fruits:
+                min_msg = widget_config.get("minSelectionsMessage", _("Please select at least {min} fruit(s)."))
+                self.add_error(
+                    "favorite_fruits",
+                    min_msg.format(min=min_fruits),
+                )
+            elif len(fruits) > max_fruits:
                 self.add_error(
                     "favorite_fruits",
                     _("Please select no more than {count} fruits.").format(count=max_fruits),
                 )
+
+        # Server-side validation for bio length (already done by max_length on field)
+        # bio = cleaned_data.get("bio")
+        # if bio and len(bio) > 500:
+        #     self.add_error("bio", _("Bio cannot exceed 500 characters."))
 
         return cleaned_data

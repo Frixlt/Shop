@@ -1,62 +1,75 @@
-// --"--\Catalog\store\static_dev\js\widgets\select_input.js"--
-
 /**
  * Handles declension of words based on a number.
  * Expects a config object like:
  * {
- *   variable: 'items',
+ *   variable: 'items', // The name of the quantity (optional, for context)
  *   rules: [
- *     { value: 1, condition: '=', form: 'товар' },
- *     { value: '2-4', condition: '-', form: 'товара' },
- *     { value: 0, condition: '=', form: 'товаров' },
- *     { value: 5, condition: '>=', form: 'товаров' },
+ *     { value: 1, condition: '=', form: 'товар' },            // 1 товар
+ *     { value: '2-4', condition: '-', form: 'товара' },       // 2-4 товара
+ *     { value: 0, condition: '=', form: 'товаров' },          // 0 товаров
+ *     { value: 5, condition: '>=', form: 'товаров' },        // 5+ товаров (or default)
+ *     // Add more specific rules if needed (e.g., for 11-14)
  *   ]
  * }
  * Conditions: '=', '-', '>', '<', '>=', '<='
  */
 class DeclensionHandler {
   constructor(config, trackChanges = false) {
-    this.variable = config?.variable || '';
-    this.rules = config?.rules || [];
-    this._value = 0;
-    this.trackChanges = trackChanges;
-    this.callbacks = [];
+    this.variable = config?.variable || ''; // Optional name for the variable
+    this.rules = config?.rules || [];       // Array of declension rules
+    this._value = 0;                        // Internal value storage
+    this.trackChanges = trackChanges;       // Whether to automatically notify on value change
+    this.callbacks = [];                    // Callbacks for change notification
 
     if (this.trackChanges) {
+      // Use defineProperty to trigger notify() when 'value' is set
       Object.defineProperty(this, 'value', {
         get: () => this._value,
         set: (newValue) => {
           const num = Number(newValue);
           if (!isNaN(num) && this._value !== num) {
             this._value = num;
-            this.notify();
+            this.notify(); // Notify listeners on change
           }
         },
-        configurable: true
+        configurable: true // Allow redefining if needed
       });
     } else {
+      // If not tracking changes, just use a simple property
       this.value = 0;
     }
   }
 
+  /**
+   * Register a callback function to be called when the value changes (if trackChanges is true).
+   * @param {function} callback - The function to call (receives the declined form as argument).
+   */
   onChange(callback) {
     if (this.trackChanges && typeof callback === 'function') {
       this.callbacks.push(callback);
     }
   }
 
+  /**
+   * Notify all registered callbacks with the current declined form.
+   * @private
+   */
   notify() {
     const form = this.getDeclinedForm();
     this.callbacks.forEach(cb => cb(form));
   }
 
+  /**
+   * Calculates and returns the correctly declined form based on the current value and rules.
+   * @returns {string} The declined word form.
+   */
   getDeclinedForm() {
     const val = Number(this.trackChanges ? this._value : this.value);
-    if (isNaN(val)) return '';
+    if (isNaN(val)) return ''; // Return empty if value is not a number
 
     for (const rule of this.rules) {
-      const cV = rule.value;
-      const cT = rule.condition;
+      const cV = rule.value; // Condition value (e.g., 1, '2-4', 5)
+      const cT = rule.condition; // Condition type (e.g., '=', '-', '>=')
 
       try {
         if (cT === '=') {
@@ -75,18 +88,24 @@ class DeclensionHandler {
         }
       } catch (e) {
         console.error("Error processing declension rule:", rule, e);
+        // Continue to next rule in case of error
       }
     }
 
+    // Fallback: use the form from the last rule if no other rule matched, or return empty string
     const lastRule = this.rules[this.rules.length - 1];
     return lastRule ? lastRule.form : '';
   }
 
+  /**
+   * Updates the internal value. If trackChanges is true, this will trigger notifications.
+   * @param {*} newValue - The new value to set.
+   */
   updateValue(newValue) {
     const num = Number(newValue);
     if (!isNaN(num)) {
       if (this.trackChanges) {
-        this.value = num;
+        this.value = num; // Setter handles notification
       } else {
         if (this._value !== num) {
           this._value = num;
@@ -98,8 +117,12 @@ class DeclensionHandler {
 
 /**
  * Creates a custom select dropdown UI that syncs with a hidden native select element.
+ * Enhances standard select with features like search, multi-select, item counts, etc.
  */
 class CustomSelectWidget {
+  /**
+   * @param {HTMLElement} element - The container element (.django-custom-select-widget).
+   */
   constructor(element) {
     this.container = element;
     if (!this.container) {
@@ -107,7 +130,9 @@ class CustomSelectWidget {
       return;
     }
 
+    // --- Configuration and Data Parsing ---
     try {
+      // Default configuration merged with data-config attribute
       this.config = {
         minSelections: 0,
         maxSelections: 1,
@@ -133,7 +158,9 @@ class CustomSelectWidget {
         ...(JSON.parse(this.container.dataset.config || '{}'))
       };
 
+      // Parse choices from data-choices attribute
       this.choices = JSON.parse(this.container.dataset.choices || '[]');
+
     } catch (e) {
       console.error('CustomSelectWidget: Failed to parse config or choices JSON.', e, this.container);
       this.config = { minSelections: 0, maxSelections: 1 };
@@ -141,6 +168,7 @@ class CustomSelectWidget {
       return;
     }
 
+    // --- Native Select Association ---
     this.nativeSelectId = this.container.dataset.nativeSelectId;
     this.nativeSelect = document.getElementById(this.nativeSelectId);
     if (!this.nativeSelect) {
@@ -148,6 +176,7 @@ class CustomSelectWidget {
       return;
     }
 
+    // --- State Initialization ---
     this.selectedItems = new Set();
     Array.from(this.nativeSelect.selectedOptions).forEach(option => {
       if (option.value) {
@@ -156,6 +185,7 @@ class CustomSelectWidget {
     });
     this.selectionOrder = Array.from(this.selectedItems);
 
+    // --- Initialize Declension Handler ---
     this.declensionHandler = null;
     if (this.config.declension && Array.isArray(this.config.declension.rules) && this.config.declension.rules.length > 0) {
       this.declensionHandler = new DeclensionHandler(this.config.declension, true);
@@ -165,6 +195,7 @@ class CustomSelectWidget {
       });
     }
 
+    // --- Validate and Adjust Config ---
     if (this.config.minSelections < 0) this.config.minSelections = 0;
     if (this.config.maxSelections < 1) this.config.maxSelections = 1;
     if (this.config.minSelections > this.config.maxSelections) {
@@ -172,6 +203,7 @@ class CustomSelectWidget {
       this.config.minSelections = this.config.maxSelections;
     }
 
+    // --- Apply CSS Classes Based on Config ---
     if (this.config.stickySearch && this.config.searchable) {
       this.container.classList.add('select--sticky-search');
     }
@@ -180,10 +212,15 @@ class CustomSelectWidget {
     }
     this.container.classList.add(`select--${this.config.mode || 'overlay'}`);
 
+    // --- Final Setup ---
     this.container.widgetInstance = this;
     this.init();
   }
 
+  /**
+   * Initializes the widget by rendering structure, binding events, and updating UI.
+   * @private
+   */
   init() {
     this.renderStructure();
     this.bindEvents();
@@ -191,6 +228,12 @@ class CustomSelectWidget {
     this.updateDynamicElements();
   }
 
+  /**
+   * Determines the placeholder text based on selection state and configuration.
+   * Handles declension if configured.
+   * @returns {string} The placeholder text to display in the header.
+   * @private
+   */
   getPlaceholderText() {
     const selectedCount = this.selectedItems.size;
     const maxReached = selectedCount >= this.config.maxSelections;
@@ -213,6 +256,11 @@ class CustomSelectWidget {
     return placeholder;
   }
 
+  /**
+   * Gets the title for the selected count display area.
+   * @returns {string} The title text.
+   * @private
+   */
   getCountTitle() {
     if (this.selectedItems.size >= this.config.maxSelections && this.config.countTitleAllSelected) {
       return this.config.countTitleAllSelected.replace('{max}', this.config.maxSelections);
@@ -220,34 +268,52 @@ class CustomSelectWidget {
     return this.config.countTitle || 'Выбрано:';
   }
 
+  /**
+   * Updates the value in the DeclensionHandler based on the configured variable.
+   * @private
+   */
   updateDeclensionValue() {
     if (!this.declensionHandler) return;
+
     const declVar = this.config.declension?.variable;
     let valueToUpdate = 0;
+
     if (declVar === 'remaining') {
       valueToUpdate = Math.max(0, this.config.maxSelections - this.selectedItems.size);
+    } else if (declVar && typeof this.config[declVar] === 'number') {
+      valueToUpdate = this.config[declVar];
     }
+
     this.declensionHandler.updateValue(valueToUpdate);
   }
 
+  /**
+   * Renders the initial HTML structure within the widget container.
+   * Finds references to key elements.
+   * @private
+   */
   renderStructure() {
     this.header = this.container.querySelector('.select-header');
     this.headerText = this.container.querySelector('.select-header-text');
     this.optionsContainer = this.container.querySelector('.select-options');
 
     if (!this.header || !this.headerText || !this.optionsContainer) {
-      console.error(`CustomSelectWidget (${this.nativeSelectId}): Missing essential child elements (.select-header, .select-header-text, .select-options).`);
+      console.error(`CustomSelectWidget (${this.nativeSelectId}): Missing essential child elements (.select-header, .select-header-text, .select-options). Structure might be incorrect.`);
       return;
     }
 
     this.optionsContainer.innerHTML = this.renderLayout();
-
     this.searchInput = this.optionsContainer.querySelector('.select-search');
     this.optionsListContainer = this.optionsContainer.querySelector('.select-options-list');
     this.options = this.optionsListContainer ? this.optionsListContainer.querySelectorAll('.select-option') : [];
     this.emptyMessage = this.optionsContainer.querySelector('.select-empty');
   }
 
+  /**
+   * Generates the HTML for the content inside the options container based on layoutOrder config.
+   * @returns {string} HTML string for the options container content.
+   * @private
+   */
   renderLayout() {
     const blocks = {
       count: this.config.showCount
@@ -275,8 +341,9 @@ class CustomSelectWidget {
           const isSelected = this.selectedItems.has(item.value);
           const isHidden = this.config.hideSelectedFromList && isSelected;
           const delay = Math.min(index * 0.03, 0.3);
+
           return `<div class="select-option ${isSelected ? 'select-option--selected' : ''} ${isHidden ? 'select-option--hidden' : ''}"
-                           data-value="${item.value}"
+                          , data-value="${item.value}"
                            role="option"
                            aria-selected="${isSelected}"
                            style="animation-delay: ${delay}s">
@@ -293,8 +360,14 @@ class CustomSelectWidget {
       .join('');
   }
 
+  /**
+   * Generates HTML for the selected item badges displayed in the 'selected' block.
+   * @returns {string} HTML string of selected item badges.
+   * @private
+   */
   renderSelectedItems() {
     const textLength = this.config.selectedItemTextLength || 25;
+
     return this.selectionOrder
       .map(value => this.choices.find(item => item.value === value))
       .filter(item => item)
@@ -303,6 +376,7 @@ class CustomSelectWidget {
         const truncatedLabel = label.length > textLength
           ? label.substring(0, textLength) + '…'
           : label;
+
         return `<div class="select-selected-item" data-value="${item.value}">
                   <span class="select-selected-item-text" title="${label}">${truncatedLabel}</span>
                   <button type="button" class="select-selected-item-remove" aria-label="Remove ${label}">
@@ -312,6 +386,10 @@ class CustomSelectWidget {
       }).join('');
   }
 
+  /**
+   * Updates elements that change based on selection (count, selected items, option visibility).
+   * @private
+   */
   updateDynamicElements() {
     const countBlock = this.container.querySelector('.select-count');
     if (countBlock) {
@@ -350,15 +428,27 @@ class CustomSelectWidget {
     }
   }
 
+  /**
+   * Updates the text content of the select header (placeholder).
+   * @private
+   */
   updateHeader() {
     if (this.headerText) {
       this.headerText.textContent = this.getPlaceholderText();
     }
   }
 
+  /**
+   * Synchronizes the selected state of the hidden native select element
+   * with the custom widget's internal state (`this.selectedItems`).
+   * Dispatches a 'change' event on the native select if its state was modified.
+   * @private
+   */
   updateNativeSelect() {
     if (!this.nativeSelect) return;
+
     let changed = false;
+
     Array.from(this.nativeSelect.options).forEach(option => {
       const shouldBeSelected = this.selectedItems.has(option.value);
       if (option.selected !== shouldBeSelected) {
@@ -366,12 +456,17 @@ class CustomSelectWidget {
         changed = true;
       }
     });
+
     if (changed) {
       const event = new Event('change', { bubbles: true });
       this.nativeSelect.dispatchEvent(event);
     }
   }
 
+  /**
+   * Attaches necessary event listeners to the widget elements.
+   * @private
+   */
   bindEvents() {
     if (!this.header || !this.optionsContainer) return;
 
@@ -387,6 +482,7 @@ class CustomSelectWidget {
       const searchInput = e.target.closest('.select-search');
 
       if (option && !option.classList.contains('select-option--hidden')) {
+        e.stopPropagation(); // Prevent event bubbling to document click handler
         this.selectOption(option);
       } else if (removeBtn) {
         e.stopPropagation();
@@ -404,7 +500,11 @@ class CustomSelectWidget {
 
     document.addEventListener('click', e => {
       if (!this.container.contains(e.target) && this.container.classList.contains('select--open')) {
-        this.close();
+        setTimeout(() => {
+          if (this.container.classList.contains('select--open')) {
+            this.close();
+          }
+        }, 100); // Delay to allow option click to process
       }
     });
 
@@ -415,6 +515,10 @@ class CustomSelectWidget {
     });
   }
 
+  /**
+   * Toggles the open/closed state of the dropdown.
+   * Handles focusing the search input if configured.
+   */
   toggle() {
     const isOpen = this.container.classList.toggle('select--open');
     if (isOpen && this.searchInput) {
@@ -426,15 +530,20 @@ class CustomSelectWidget {
     }
   }
 
+  /**
+   * Closes the dropdown.
+   */
   close() {
     this.container.classList.remove('select--open');
-    // Вызываем валидацию при закрытии
-    if (typeof window.validateCustomSelect === 'function') {
-      window.validateCustomSelect(this.container);
-    }
   }
 
-  // В Catalog\store\static_dev\js\widgets\select_input.js
+  /**
+   * Handles the selection or deselection of an option.
+   * Updates internal state, UI, and native select.
+   * Respects minSelections and maxSelections constraints.
+   * @param {HTMLElement} option - The clicked option element.
+   * @private
+   */
   selectOption(option) {
     const value = option.dataset.value;
     const isSelected = this.selectedItems.has(value);
@@ -509,10 +618,13 @@ class CustomSelectWidget {
     } else if (this.config.autoCloseOnComplete && this.selectedItems.size >= this.config.maxSelections) {
       this.close();
     }
-
-    // НЕ вызываем валидацию здесь, она должна быть в close() или focusout
   }
 
+  /**
+   * Removes a selected item, triggered by clicking the remove button in the selected items area.
+   * Updates state, UI, and native select. Respects minSelections constraint.
+   * @param {string} value - The value of the item to remove.
+   */
   removeSelectedItem(value) {
     if (!this.selectedItems.has(value)) return;
 
@@ -551,6 +663,12 @@ class CustomSelectWidget {
     }
   }
 
+  /**
+   * Filters the options list based on the search query.
+   * Hides/shows options and the 'empty' message accordingly.
+   * @param {string} query - The search term entered by the user.
+   * @private
+   */
   filterOptions(query) {
     if (!this.searchInput || !this.optionsListContainer || !this.emptyMessage) return;
 
@@ -562,6 +680,7 @@ class CustomSelectWidget {
       const text = opt.querySelector('span:last-child')?.textContent.toLowerCase() || '';
       const matches = text.includes(q);
       const shouldDisplay = matches && !isSelectedAndHidden;
+
       opt.style.display = shouldDisplay ? '' : 'none';
       if (shouldDisplay) {
         visibleCount++;
@@ -572,6 +691,10 @@ class CustomSelectWidget {
   }
 }
 
+/**
+ * Finds all elements with the '.django-custom-select-widget' class
+ * and initializes a CustomSelectWidget instance for each.
+ */
 function initAllCustomSelects() {
   const selectWidgets = document.querySelectorAll('.django-custom-select-widget');
   selectWidgets.forEach(widgetElement => {

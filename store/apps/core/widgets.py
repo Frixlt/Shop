@@ -6,7 +6,8 @@ from django.utils.encoding import force_str
 from django.utils.functional import Promise
 from django.utils.safestring import mark_safe  # Импортируем mark_safe
 
-__all__ = ()
+# Add TextareaInput to the export list
+__all__ = ("TextInput", "PasswordInput", "SelectInput", "CheckboxInput", "TextareaInput")
 
 
 class TextInput(django.forms.widgets.TextInput):
@@ -212,3 +213,36 @@ class CheckboxInput(django.forms.widgets.CheckboxInput):
             widget_context["label"] = mark_safe(widget_context["label"])
 
         return context
+
+
+# --- NEW TextareaInput ---
+class TextareaInput(django.forms.widgets.Textarea):
+    """
+    Кастомный виджет для textarea, использующий отдельный шаблон и поддерживающий иконку.
+    """
+
+    template_name = "widgets/textarea_input.html"
+    label = None
+    is_required = False
+
+    def __init__(self, attrs=None, icon_class="fa-comment-alt"):  # Default icon
+        attrs = attrs or {}
+        # Textarea doesn't have a 'type' attribute
+        super().__init__(attrs)
+        self.icon_class = icon_class
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        widget_context = context.setdefault("widget", {})
+        widget_context["label"] = getattr(self, "label", None)
+        widget_context["is_required"] = getattr(self, "is_required", False)
+        widget_context["icon_class"] = self.icon_class  # Pass icon class
+        final_attrs = widget_context.get("attrs", {})
+        if "id" not in final_attrs:
+            final_attrs["id"] = attrs.get("id", f"id_{name}")  # Ensure ID
+
+        widget_context["attrs"] = final_attrs
+        return context
+
+
+# --- END TextareaInput ---

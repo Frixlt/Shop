@@ -1,0 +1,37 @@
+// --"--\Catalog\store\static_dev\scss\widgets\_textarea_input.scss"--
+
+.auth-textarea {
+  width: 100%;
+  // Padding: top/bottom, right, left (for icon)
+  padding: 0.8rem 1rem 0.8rem 2.5rem; // Standard padding, keeping space for icon
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  font-size: 1rem;
+  font-family: $font-family-base; // Ensure base font
+  transition: all $transition-speed cubic-bezier(0.4, 0, 0.2, 1); // Consistent transition
+  line-height: 1.5; // Standard line height
+  resize: vertical; // Allow vertical resizing only
+  min-height: 100px; // Set a sensible minimum height
+  transform-origin: left; // For potential focus effects
+
+  &::placeholder {
+    color: var(--text-color-secondary);
+    opacity: 0.8;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px var(--input-focus); // Consistent focus shadow
+    transform: scale(1.01); // Optional: keep scale effect on focus
+  }
+}
+
+// The .input-wrapper styles (position relative) and .input-icon styles
+// from _text_input.scss will apply correctly because the HTML structure is similar.
+
+// State styling (error/success on the wrapper) is also handled by rules in
+// _text_input.scss (or a shared file) targeting .input-wrapper.error/success
+// and applied via JS. No specific textarea styles needed for these states here.

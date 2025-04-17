@@ -171,6 +171,7 @@
 
   // --- Стили для Label (применяются ко всем) ---
   label {
+    display: flex;
     align-items: center;
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
