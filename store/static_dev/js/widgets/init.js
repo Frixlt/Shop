@@ -211,12 +211,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const fileInput = container.querySelector('.file-input');
         if (fileInput?.id) { // Use optional chaining
           const instance = window.fileUploadInstances[fileInput.id];
+          // --- MODIFIED RESET LOGIC ---
           if (instance?.errorMessage) { // Use optional chaining
-            instance.errorMessage.style.display = 'none';
+            instance.errorMessage.classList.add('hidden'); // Use class consistently
             instance.errorMessage.textContent = '';
           }
+          if (instance?.container) { // Also check container existence
+            instance.container.classList.remove('upload-error');
+          }
+          // --- END MODIFIED RESET LOGIC ---
         }
-        container.classList.remove('upload-error');
       });
 
       // --- Perform Client-Side Validation ---
@@ -253,28 +257,31 @@ document.addEventListener("DOMContentLoaded", () => {
               const requiredMsg = element.dataset.requiredMessage || "Please select at least one file.";
               if (instance.errorMessage) {
                 instance.errorMessage.textContent = requiredMsg;
-                instance.errorMessage.classList.remove('hidden');
+                instance.errorMessage.classList.remove('hidden'); // Show the error message element
                 instance.container?.classList.add('upload-error');
               }
             } else {
               // Clear previous *required* error if it was showing and is now resolved
               if (instance.errorMessage && instance.errorMessage.textContent === (element.dataset.requiredMessage || "Please select at least one file.")) {
                 instance.errorMessage.textContent = '';
-                instance.errorMessage.classList.add('hidden');
+                instance.errorMessage.classList.add('hidden'); // Hide the error message element
                 instance.container?.classList.remove('upload-error');
               }
             }
 
-            // Check if the JS widget has *already* displayed an error (e.g., size/count limit)
-            if (instance.errorMessage && !instance.errorMessage.classList.contains('hidden')) {
-              fieldHasError = true; // Consider invalid if error msg is visible
+            // --- MODIFIED CHECK ---
+            // Check if the JS widget has displayed an error (visible AND has content)
+            if (instance.errorMessage &&
+              !instance.errorMessage.classList.contains('hidden') &&
+              instance.errorMessage.textContent.trim() !== '') {
+              fieldHasError = true; // Consider invalid ONLY if error msg is visible AND has content
               console.log(`[${formId}] File input #${element.id} invalid due to visible error message: "${instance.errorMessage.textContent}"`);
             }
+            // --- END MODIFIED CHECK ---
 
             if (fieldHasError) {
               currentFieldIsValid = false;
             }
-
           }
         }
 
@@ -298,10 +305,15 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => { form.classList.remove("animate__animated", "animate__shakeX"); }, 600);
         if (firstInvalidElement) {
           const elementToFocus = firstInvalidElement.matches('.checkbox-custom, .dropzone, .form-error') ? firstInvalidElement : firstInvalidElement;
-          elementToFocus.focus({ preventScroll: true });
+          // Ensure element is focusable before trying to focus
+          if (typeof elementToFocus.focus === 'function') {
+            elementToFocus.focus({ preventScroll: true });
+          }
           const elementToScroll = firstInvalidElement.closest('.form-field') || firstInvalidElement.closest('.file-upload-container') || elementToFocus;
           console.log(`[${formId}] Scrolling to:`, elementToScroll);
-          elementToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (typeof elementToScroll.scrollIntoView === 'function') {
+            elementToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
         }
         // Re-enable button immediately if client validation fails
         if (submitButton) {
@@ -463,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             if (genericErrorDiv && genericErrorDiv.textContent.trim()) { genericErrorDiv.style.display = 'block'; if (!firstInvalidElement) firstInvalidElement = genericErrorDiv; }
             form.classList.add("animate__animated", "animate__shakeX"); setTimeout(() => form.classList.remove("animate__animated", "animate__shakeX"), 600);
-            if (firstInvalidElement) { const elementToFocus = firstInvalidElement.matches('.checkbox-custom, .dropzone, .form-error') ? firstInvalidElement : firstInvalidElement; elementToFocus.focus({ preventScroll: true }); const elToScroll = firstInvalidElement.closest('.form-field') || firstInvalidElement.closest('.file-upload-container') || firstInvalidElement; elToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+            if (firstInvalidElement) { const elementToFocus = firstInvalidElement.matches('.checkbox-custom, .dropzone, .form-error') ? firstInvalidElement : firstInvalidElement; if (typeof elementToFocus.focus === 'function') { elementToFocus.focus({ preventScroll: true }); } const elToScroll = firstInvalidElement.closest('.form-field') || firstInvalidElement.closest('.file-upload-container') || firstInvalidElement; if (typeof elToScroll.scrollIntoView === 'function') { elToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }
             if (submitButton) { submitButton.innerHTML = originalButtonHTML; submitButton.disabled = false; }
 
             // 3. OTHER ERROR CASE (Server Error, Network Error, etc.)

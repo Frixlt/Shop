@@ -1,3 +1,5 @@
+// --"--\Catalog\store\static_dev\js\widgets\file_input.js"--
+
 /**
  * FileUpload Class - Configurable file upload component for Django Widgets
  * Adapts the standalone example to work with the structure rendered by file_input.html
@@ -51,6 +53,7 @@ class FileUpload {
     // --- State ---
     this.uploadedFiles = []; // Array to hold { id: string, file: File } objects
     this.fileIdCounter = 0; // Simple counter for unique preview IDs
+    this.isProcessingProgrammaticChange = false; // <<<--- ADDED FLAG
 
     // --- Initialization ---
     this.setupEventListeners();
@@ -67,6 +70,13 @@ class FileUpload {
   setupEventListeners() {
     // File input change event
     this.fileInput.addEventListener('change', (e) => {
+      // --- ADDED CHECK FOR THE FLAG ---
+      if (this.isProcessingProgrammaticChange) {
+        console.log("FileUpload: Skipping programmatic change event processing.");
+        return; // Exit if this event was triggered by our own dispatchEvent
+      }
+      // --- END CHECK ---
+
       if (e.target.files.length > 0) {
         this.processFiles(e.target.files);
         // Reset input value to allow selecting the same file again
@@ -266,7 +276,7 @@ class FileUpload {
     // Important: Clear the native file input's value as well
     this.fileInput.value = '';
     // Trigger a change event on the native input if needed for form validation libraries
-    // this.fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+    this.triggerNativeChangeEvent();
   }
 
   removeFile(fileId) {
@@ -285,8 +295,6 @@ class FileUpload {
     }
 
     // Update the native file input's FileList (BEST EFFORT - usually read-only)
-    // This is tricky and often not fully supported. The primary way to handle
-    // removal is usually during the AJAX upload preparation in init.js.
     this.updateNativeInputFileList();
 
 
@@ -306,8 +314,15 @@ class FileUpload {
     this.uploadedFiles.forEach(fileData => {
       dataTransfer.items.add(fileData.file);
     });
-    this.fileInput.files = dataTransfer.files;
-    // console.log("Native files count after update attempt:", this.fileInput.files.length);
+    try {
+      this.fileInput.files = dataTransfer.files;
+      // console.log("Native files count after update attempt:", this.fileInput.files.length);
+    } catch (e) {
+      console.warn("Could not programmatically update FileList (expected behavior in some browsers):", e);
+    }
+    // Even if the above fails, trigger the change event
+    this.triggerNativeChangeEvent();
+
   }
 
   validatePostRemoval() {
@@ -346,23 +361,38 @@ class FileUpload {
     let currentErrors = [];
     let filesToAdd = [];
     let totalNewSize = 0;
-    const currentFileCount = this.uploadedFiles.length;
+    const currentFileCount = this.uploadedFiles.length; // Get count *before* processing new files
     const maxFiles = this.config.maxFileCount;
     const maxSize = this.config.maxFileSize;
 
     // --- Pre-checks for the incoming batch ---
+    // Check if adding *any* of the new files would immediately exceed the total count limit
     if (Number.isFinite(maxFiles) && currentFileCount + files.length > maxFiles) {
       currentErrors.push(`Cannot add ${files.length} file(s). Max ${maxFiles} files allowed (already have ${currentFileCount}).`);
     } else {
+      // Process each file individually if the initial count check passes
       Array.from(files).forEach(file => {
         let fileIsValid = true;
 
-        // Duplicate Check
-        const isDuplicate = this.uploadedFiles.some(existing => existing.file.name === file.name && existing.file.size === file.size);
-        if (isDuplicate) {
-          console.warn(`Skipping duplicate file: ${file.name}`);
-          fileIsValid = false;
+        // --- Individual File Checks ---
+
+        // Count Check (Check again inside loop in case maxFileCount is 1)
+        if (Number.isFinite(maxFiles) && this.uploadedFiles.length + filesToAdd.length >= maxFiles) {
+          if (!currentErrors.includes(`Maximum file count (${maxFiles}) reached.`)) { // Avoid duplicate error
+            currentErrors.push(`Maximum file count (${maxFiles}) reached.`);
+          }
+          fileIsValid = false; // Don't process further checks for this file if count limit hit
         }
+
+        // Duplicate Check
+        if (fileIsValid) {
+          const isDuplicate = this.uploadedFiles.some(existing => existing.file.name === file.name && existing.file.size === file.size);
+          if (isDuplicate) {
+            console.warn(`Skipping duplicate file: ${file.name}`);
+            fileIsValid = false;
+          }
+        }
+
 
         // Per-File Size Check (Mode 1)
         if (fileIsValid && this.config.sizeCalculationMode === 1 && file.size > maxSize) {
@@ -380,12 +410,16 @@ class FileUpload {
       });
     }
 
-    // Total Size Check (Mode 2)
+    // Total Size Check (Mode 2) - Check after filtering valid files from the batch
     if (this.config.sizeCalculationMode === 2 && filesToAdd.length > 0) {
-      const currentTotalSize = this.calculateTotalSize();
+      const currentTotalSize = this.calculateTotalSize(); // Existing total size
       if (currentTotalSize + totalNewSize > maxSize) {
-        currentErrors.push(`Adding files would exceed total size limit (${this.formatFileSize(maxSize)}). Current: ${this.formatFileSize(currentTotalSize)}`);
-        filesToAdd = []; // Prevent adding if total limit exceeded
+        // Construct error message *before* clearing filesToAdd
+        const errorMsg = `Adding files (${this.formatFileSize(totalNewSize)}) would exceed total size limit (${this.formatFileSize(maxSize)}). Current: ${this.formatFileSize(currentTotalSize)}`;
+        if (!currentErrors.includes(errorMsg)) { // Avoid duplicate message
+          currentErrors.push(errorMsg);
+        }
+        filesToAdd = []; // Prevent adding this batch if total limit exceeded
       }
     }
 
@@ -400,20 +434,15 @@ class FileUpload {
 
     // --- Add valid files ---
     if (filesToAdd.length > 0) {
-      // If only 1 file allowed, clear existing first
+      // If only 1 file allowed, clear existing first (this case might be redundant due to earlier checks, but safe to keep)
       if (this.config.maxFileCount === 1 && this.uploadedFiles.length > 0) {
         this.clearAllFiles();
       }
 
       filesToAdd.forEach(file => {
-        // Double-check count again in case maxFileCount is 1 and we just cleared
+        // Final check before adding each file (mostly redundant but safe)
         if (Number.isFinite(maxFiles) && this.uploadedFiles.length >= maxFiles) {
-          if (!currentErrors.includes(`Maximum file count (${maxFiles}) reached.`)) { // Avoid duplicate error
-            currentErrors.push(`Maximum file count (${maxFiles}) reached.`);
-            this.errorMessage.textContent = currentErrors.join(' ');
-            this.errorMessage.classList.remove('hidden');
-          }
-          return; // Stop adding more files
+          return; // Stop adding more files if limit reached unexpectedly
         }
 
         const fileId = this.generateFileId();
@@ -426,15 +455,29 @@ class FileUpload {
       });
 
       // Update the native input's FileList (Best Effort)
-      this.updateNativeInputFileList();
+      this.updateNativeInputFileList(); // This now also triggers the change event
     }
 
-    // --- Trigger change event on native input ---
-    // This helps form validation libraries or other scripts detect a change.
-    // It might not reflect the drag-dropped files correctly in form submission
-    // without AJAX, but it signals that *something* happened.
-    this.fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+    // --- REMOVED Dispatch Event: Moved inside updateNativeInputFileList ---
+    // The event is now triggered *after* attempting to update the native FileList.
 
+  } // End processFiles
+
+  /**
+   * Programmatically triggers a 'change' event on the native file input,
+   * while preventing the event listener from processing it recursively.
+   * @private
+   */
+  triggerNativeChangeEvent() {
+    console.log(`FileUpload: Triggering native change event for ${this.fileInput.id}`);
+    this.isProcessingProgrammaticChange = true; // <<<--- SET FLAG BEFORE DISPATCH
+    try {
+      this.fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch (error) {
+      console.error("FileUpload: Error dispatching programmatic change event:", error);
+    } finally {
+      this.isProcessingProgrammaticChange = false; // <<<--- RESET FLAG AFTER DISPATCH
+    }
   }
 
   // Method to get the list of managed File objects

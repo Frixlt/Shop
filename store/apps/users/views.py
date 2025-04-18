@@ -1,9 +1,11 @@
 # --"--\Catalog\store\apps\users\views.py"--
 
 import pprint
+
 import django.http
 import django.shortcuts
 import django.views.generic
+
 import apps.users.forms
 
 __all__ = ()

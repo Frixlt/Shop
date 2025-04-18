@@ -23,9 +23,6 @@ Context variables:
         <span id="{{ widget.attrs.id }}-label" class="file-field-label"> {# Added ID for aria-labelledby #}
           {{ widget.label }}
           {% if widget.is_required %}<span class="required-indicator">*</span>{% endif %}
-          {% if not widget.is_required %}
-            <span class="optional-text">({% trans "optional" %})</span>
-          {% endif %}
         </span>
       {% endif %}
       <div class="file-field-actions">
