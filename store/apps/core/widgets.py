@@ -276,7 +276,7 @@ class SelectInput(django.forms.widgets.Select):
         "icon": "fa-angle-down",
         "indicatorShape": "circle",
         "autoDeselect": True,
-        "countTitle": "Выберано:",
+        "countTitle": "Выбрано:",
         "countTitleAllSelected": "Выбрано (макс. {max}):",
         "selectedItemTextLength": 15,
         "autoCloseOnComplete": False,
