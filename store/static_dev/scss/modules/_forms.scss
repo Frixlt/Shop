@@ -170,7 +170,7 @@
   }
 
   // --- Стили для Label (применяются ко всем) ---
-  label {
+  label:not(.checkbox-label) {
     display: flex;
     align-items: center;
     margin-bottom: 0.5rem;

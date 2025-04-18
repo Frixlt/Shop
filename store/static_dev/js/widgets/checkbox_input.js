@@ -1,7 +1,3 @@
-document.addEventListener('DOMContentLoaded', () => {
-  initCheckboxes();
-});
-
 function initCheckboxes() {
   console.log("Initializing checkboxes...");
   const checkboxes = document.querySelectorAll('.checkbox-input');
@@ -45,7 +41,9 @@ function initCheckboxes() {
           event.stopPropagation();
           return;
         }
-        checkbox.click();
+        event.preventDefault(); // Prevent default to avoid double toggling
+        checkbox.checked = !checkbox.checked; // Toggle checkbox state
+        checkbox.dispatchEvent(new Event('change')); // Trigger change event for validation
       });
     }
   });
@@ -94,3 +92,5 @@ function validateCheckbox(checkbox) {
 
   return isValid;
 }
+
+export { initCheckboxes, validateCheckbox };
