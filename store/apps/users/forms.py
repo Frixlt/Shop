@@ -79,7 +79,7 @@ class TestAuthForm(BaseForm):
                 "data-pattern": r"^\+?\d[\d\s\(\)-]{9,14}$",
                 "maxlength": "18",  # Limit input length
                 "data-phone-message": _(
-                    "Please enter a valid phone number (e.g., +79991234567)."
+                    "Please enter a valid phone number (e.g., +79991234567).",
                 ),  # Used by JS for tel type
                 "data-pattern-error-message": _("Please enter a valid phone number format."),  # Used by JS for pattern
             },
@@ -192,7 +192,7 @@ class TestAuthForm(BaseForm):
         label=mark_safe(  # Use mark_safe because the label contains HTML links
             _(
                 'I accept the <a href="/terms" class="auth-link" target="_blank">terms of use</a> and '
-                '<a href="/privacy" class="auth-link" target="_blank">privacy policy</a>'
+                '<a href="/privacy" class="auth-link" target="_blank">privacy policy</a>',
             ),
         ),
         required=True,
@@ -200,7 +200,7 @@ class TestAuthForm(BaseForm):
             attrs={
                 # Message for client-side required validation
                 "data-required-message": _("You must accept the terms and conditions."),
-            }
+            },
             # CheckboxInput automatically uses label from field
         ),
         error_messages={  # Server-side message if checkbox not checked
@@ -242,7 +242,7 @@ class TestAuthForm(BaseForm):
         Returns:
             list: A list of UploadedFile objects, or an empty list if not required and no files uploaded.
                   Returns None if the field is required and no files were uploaded (letting Django handle required error).
-        """
+        """  # noqa: E501 - Line too long
         # Use add_prefix for consistency if the form might have a prefix
         files = self.files.getlist(self.add_prefix("uploaded_docs"))
 

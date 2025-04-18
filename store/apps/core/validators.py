@@ -127,13 +127,13 @@ class FileUploadValidator:
 
         # Define error messages, allowing overrides from config
         self.max_count_message = self.config.get("max_count_message") or _(
-            "You can upload a maximum of {count} file(s). You attempted to upload {uploaded}."
+            "You can upload a maximum of {count} file(s). You attempted to upload {uploaded}.",
         )
         self.max_size_message = self.config.get("max_size_message") or _(
-            "File '{filename}' ({size}) exceeds the maximum size limit of {limit}."
+            "File '{filename}' ({size}) exceeds the maximum size limit of {limit}.",
         )
         self.total_size_message = self.config.get("total_size_message") or _(
-            "Total size of files ({total_size}) exceeds the maximum limit of {limit}."
+            "Total size of files ({total_size}) exceeds the maximum limit of {limit}.",
         )
 
     def __call__(self, form):

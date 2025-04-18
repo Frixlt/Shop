@@ -107,7 +107,7 @@ class BaseForm(django.forms.Form):
                 confirm_field_name=confirm_name,
                 message=mismatch_message,  # Pass specific message to validator
             )(
-                self
+                self,
             )  # Call the validator instance with the form
 
         # --- File Upload Validation ---
