@@ -1,23 +1,29 @@
-# --"--\Catalog\store\apps\users\forms.py"--
+# --"--\Catalog\store\apps\users\forms.py"-- (COMPLETE - No changes needed from last version)
 import django.core.exceptions
 import django.forms
 from django.utils.translation import gettext_lazy as _
-from django.utils.safestring import mark_safe  # Импортируем mark_safe
+from django.utils.safestring import mark_safe
+from django.template.defaultfilters import filesizeformat  # Import filesizeformat
 
-# Import TextareaInput
+# Import all widgets from core
 import apps.core.widgets
 
-# Add TextareaInput to __all__ if you want it exported from this module specifically
+# Add FileInput if exporting widgets from this module specifically (optional)
 __all__ = ()
 
 
 class BaseForm(django.forms.Form):
+    """
+    Base form to automatically link widgets with field properties
+    like label, required status, and ID.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         auto_id_format = self.auto_id
         for field_name, field in self.fields.items():
             widget = field.widget
-            # Add TextareaInput to the instance check
+            # Check if the widget is one of our custom ones
             if isinstance(
                 widget,
                 (
@@ -25,22 +31,29 @@ class BaseForm(django.forms.Form):
                     apps.core.widgets.PasswordInput,
                     apps.core.widgets.SelectInput,
                     apps.core.widgets.CheckboxInput,
-                    apps.core.widgets.TextareaInput,  # <-- ADD HERE
+                    apps.core.widgets.TextareaInput,
+                    apps.core.widgets.FileInput,  # Added FileInput
                 ),
             ):
+                # Pass field properties to the widget instance
                 widget.label = field.label
                 widget.is_required = field.required
+                # Assign ID based on Django's auto_id
                 if auto_id_format and "%s" in auto_id_format:
                     calculated_id = auto_id_format % field_name
                     if widget.attrs is None:
                         widget.attrs = {}
-
                     widget.attrs["id"] = calculated_id
-                    if isinstance(widget, apps.core.widgets.SelectInput):
-                        widget.choices = field.choices
+                # Specific handling for SelectInput choices
+                if isinstance(widget, apps.core.widgets.SelectInput):
+                    widget.choices = field.choices
 
 
 class TestAuthForm(BaseForm):
+    """
+    A comprehensive test form demonstrating various custom widgets.
+    """
+
     username = django.forms.CharField(
         label=_("Username"),
         required=True,
@@ -65,7 +78,8 @@ class TestAuthForm(BaseForm):
         widget=apps.core.widgets.TextInput(
             attrs={
                 "placeholder": "your@email.com",
-                "data-pattern": r"""(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])""",
+                # Using a simpler pattern, Django's EmailValidator handles stricter validation
+                "data-pattern": r".+@.+\..+",
                 "data-required-message": _("Please enter an email address."),
                 "data-email-message": _("Please enter a valid email address."),
                 "data-pattern-error-message": _("Please enter a valid email address."),
@@ -74,7 +88,7 @@ class TestAuthForm(BaseForm):
         ),
         error_messages={
             "required": _("Please enter an email address."),
-            "invalid": _("Please enter a valid email address."),
+            "invalid": _("Please enter a valid email address."),  # Django's default validator message
         },
     )
     phone = django.forms.CharField(
@@ -83,7 +97,7 @@ class TestAuthForm(BaseForm):
         widget=apps.core.widgets.TextInput(
             attrs={
                 "placeholder": "+7 (999) 123-4567",
-                "data-pattern": r"^\+?\d[\d\s\(\)-]{9,14}$",
+                "data-pattern": r"^\+?\d[\d\s\(\)-]{9,14}$",  # Example pattern
                 "maxlength": "18",
                 "data-phone-message": _("Please enter a valid phone number (e.g., +79991234567)."),
                 "data-pattern-error-message": _("Please enter a valid phone number format."),
@@ -119,7 +133,7 @@ class TestAuthForm(BaseForm):
             attrs={
                 "placeholder": _("Repeat your password"),
                 "data-required-message": _("Please confirm your password."),
-                "data-confirm-target": "id_password",
+                "data-confirm-target": "id_password",  # ID of the main password field
                 "data-mismatch-message": _("Passwords do not match."),
             },
             icon_class="fa-shield-alt",
@@ -146,7 +160,7 @@ class TestAuthForm(BaseForm):
         choices=FRUIT_CHOICES,
         widget=apps.core.widgets.SelectInput(
             config={
-                "min_selections": 1,  # Changed to 1 because field is required
+                "min_selections": 1,  # Field is required
                 "max_selections": 3,
                 "placeholder": _("Choose up to {maxSelections} fruits"),
                 "placeholderAllSelected": _("Maximum {maxSelections} fruits selected"),
@@ -172,33 +186,32 @@ class TestAuthForm(BaseForm):
             },
         ),
         error_messages={
-            "required": _("Please select at least one fruit."),  # Use required for single error message
+            "required": _("Please select at least one fruit."),
+            # More specific errors handled in clean method
         },
     )
 
-    # --- NEW Textarea Field ---
     bio = django.forms.CharField(
         label=_("About You"),
-        required=False,  # Example: make it optional
+        required=False,
         widget=apps.core.widgets.TextareaInput(
             attrs={
                 "placeholder": _("Tell us a little about yourself..."),
-                "rows": 4,  # Suggest initial rows
-                "data-max-length": 500,  # Client-side validation hint
-                "data-max-length-message": _("Bio cannot exceed 500 characters."),  # Custom message
+                "rows": 4,
+                "data-max-length": 500,
+                "data-max-length-message": _("Bio cannot exceed 500 characters."),
             },
-            icon_class="fa-feather-alt",  # Example different icon
+            icon_class="fa-feather-alt",
         ),
-        max_length=500,  # Enforce server-side limit
-        help_text=_("Optional: Maximum 500 characters."),  # Optional help text
+        max_length=500,
+        help_text=_("Optional: Maximum 500 characters."),
     )
-    # --- END Textarea Field ---
 
     terms_agreement = django.forms.BooleanField(
         label=mark_safe(
             _(
-                'I accept the <a href="#" class="auth-link">terms of use</a> and <a href="#"'
-                ' class="auth-link">privacy policy</a>',
+                'I accept the <a href="/terms" class="auth-link" target="_blank">terms of use</a> and <a'
+                ' href="/privacy" class="auth-link" target="_blank">privacy policy</a>',
             ),
         ),
         required=True,
@@ -212,7 +225,27 @@ class TestAuthForm(BaseForm):
         },
     )
 
+    # File Upload Field
+    uploaded_docs = django.forms.FileField(
+        label=_("Upload Documents"),
+        required=False,  # Set to True if needed
+        widget=apps.core.widgets.FileInput(
+            config={
+                "maxFileCount": 5,
+                "maxFileSize": 5 * 1024 * 1024,  # 5MB in bytes
+                "acceptedFormats": "image/jpeg, image/png, .pdf, .docx",
+                "sizeCalculationMode": 1,  # 1: per file, 2: total
+            },
+            # Add required attribute to widget attrs if field is required
+            # attrs={'required': 'required'}
+        ),
+        help_text=_("Optional: Up to 5 files (JPG, PNG, PDF, DOCX), max 5MB each."),
+    )
+
+    # --- Clean Methods ---
+
     def clean_phone(self):
+        """Example specific field validation for phone"""
         phone = self.cleaned_data.get("phone")
         if phone:
             cleaned_phone = "".join(digit for digit in phone if digit.isdigit())
@@ -221,10 +254,10 @@ class TestAuthForm(BaseForm):
                     _("Phone number seems too short."),
                     code="invalid_phone",
                 )
-
         return phone
 
     def clean_confirm_password(self):
+        """Validate that passwords match"""
         password = self.cleaned_data.get("password")
         confirm_password = self.cleaned_data.get("confirm_password")
         if password and confirm_password and password != confirm_password:
@@ -232,38 +265,72 @@ class TestAuthForm(BaseForm):
                 _("Passwords do not match."),
                 code="password_mismatch",
             )
-
         return confirm_password
 
-    def clean(self):
-        cleaned_data = super().clean()
-        fruits = cleaned_data.get("favorite_fruits")
-        # Adjusted validation for favorite_fruits based on config
+    def clean_favorite_fruits(self):
+        """Validate multi-select constraints"""
+        fruits = self.cleaned_data.get("favorite_fruits")
         if fruits:
             widget_config = self.fields["favorite_fruits"].widget.config
             min_fruits = widget_config.get("minSelections", 0)
-            max_fruits = widget_config.get("maxSelections", 3)
-
-            if self.fields["favorite_fruits"].required and len(fruits) < 1:
-                # This is usually handled by the 'required' error message,
-                # but you could add a specific check if minSelections is > 1
-                # For now, we rely on the default required handling.
-                pass  # Let default required handle this
-            elif len(fruits) < min_fruits:
+            max_fruits = widget_config.get("maxSelections", 1)
+            if len(fruits) < min_fruits:
                 min_msg = widget_config.get("minSelectionsMessage", _("Please select at least {min} fruit(s)."))
-                self.add_error(
-                    "favorite_fruits",
-                    min_msg.format(min=min_fruits),
-                )
+                raise django.core.exceptions.ValidationError(min_msg.format(min=min_fruits))
             elif len(fruits) > max_fruits:
-                self.add_error(
-                    "favorite_fruits",
-                    _("Please select no more than {count} fruits.").format(count=max_fruits),
+                raise django.core.exceptions.ValidationError(
+                    _("Please select no more than {count} fruits.").format(count=max_fruits)
+                )
+        return fruits
+
+    def clean_uploaded_docs(self):
+        """
+        Validate uploaded files based on widget configuration using self.files.
+        """
+        files = self.files.getlist("uploaded_docs")  # Access files via form.files
+        field = self.fields["uploaded_docs"]
+        widget = field.widget
+        config = widget.config if hasattr(widget, "config") else {}
+
+        max_size = config.get("maxFileSize", 0)
+        max_count = config.get("maxFileCount", 1)
+        size_mode = config.get("sizeCalculationMode", 1)
+
+        # Check max file count
+        if len(files) > max_count:
+            raise django.core.exceptions.ValidationError(
+                _("You can upload a maximum of {count} file(s). You uploaded {uploaded}.").format(
+                    count=max_count, uploaded=len(files)
+                ),
+                code="max_count_exceeded",
+            )
+
+        # Check individual file sizes (Mode 1)
+        if size_mode == 1:
+            for file in files:
+                if max_size > 0 and file.size > max_size:
+                    raise django.core.exceptions.ValidationError(
+                        _("File '{filename}' ({size}) exceeds the maximum size limit of {limit}.").format(
+                            filename=file.name, size=filesizeformat(file.size), limit=filesizeformat(max_size)
+                        ),
+                        code="max_size_exceeded",
+                    )
+        # Check total file size (Mode 2)
+        elif size_mode == 2:
+            total_size = sum(file.size for file in files)
+            if max_size > 0 and total_size > max_size:
+                raise django.core.exceptions.ValidationError(
+                    _("Total size of files ({total_size}) exceeds the maximum limit of {limit}.").format(
+                        total_size=filesizeformat(total_size), limit=filesizeformat(max_size)
+                    ),
+                    code="total_max_size_exceeded",
                 )
 
-        # Server-side validation for bio length (already done by max_length on field)
-        # bio = cleaned_data.get("bio")
-        # if bio and len(bio) > 500:
-        #     self.add_error("bio", _("Bio cannot exceed 500 characters."))
+        # NOTE: Returning None is correct here. Files are handled via self.files / request.FILES.
+        return files
 
+    def clean(self):
+        """General form clean method"""
+        cleaned_data = super().clean()
+        # Add any cross-field validation if needed here
         return cleaned_data

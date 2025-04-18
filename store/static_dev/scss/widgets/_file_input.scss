@@ -1,0 +1,303 @@
+// --"--\Catalog\store\static_dev\scss\widgets\_file_input.scss"--
+// Styles adapted from the provided HTML example
+
+// Variables are assumed to be available from _variables.scss
+// or defined within the scope where this is imported.
+
+.file-upload-container {
+  max-width: 550px; // Or make this configurable/dynamic
+  width: 100%;
+  background: var(--card-bg);
+  padding: 1.5rem; // Slightly reduced padding
+  border-radius: 12px;
+  box-shadow: 0 4px 15px var(--box-shadow-color);
+  transition: all var(--transition-speed) ease;
+  margin-bottom: 1rem; // Add margin if used directly in flow
+
+  &:hover {
+    box-shadow: 0 8px 25px var(--box-shadow-hover-color);
+  }
+}
+
+// Reuse form-field structure if possible, or apply styles directly
+// .form-field {} // Assuming styles from _forms.scss apply
+
+.file-field-header {
+  // Changed from form-field-header to avoid potential conflicts
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem; // Increased margin
+}
+
+.file-field-label {
+  // Changed from label to avoid conflicts
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color);
+  display: flex; // Allow indicators inside
+  align-items: center;
+  gap: 0.25rem; // Space for indicators
+}
+
+.file-field-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.file-action-button {
+  // Changed from action-button
+  background: none;
+  border: none;
+  color: var(--accent-color);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all var(--transition-speed) ease;
+
+  &:hover {
+    background: var(--accent-light);
+    color: var(--accent-hover);
+  }
+
+  i {
+    margin-right: 0.25rem;
+  }
+}
+
+.dropzone {
+  position: relative;
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: all var(--transition-speed) ease;
+  cursor: pointer;
+  background: var(--input-bg);
+  overflow: hidden; // Contain progress bar
+
+  &.drag-over {
+    border-color: var(--accent-color);
+    background: var(--accent-light);
+  }
+}
+
+.dropzone-content {
+  position: relative;
+  z-index: 2; // Above hidden input
+  pointer-events: none; // Let clicks pass through to dropzone/input
+}
+
+.dropzone-icon {
+  font-size: 2.5rem;
+  color: var(--accent-color);
+  margin-bottom: 1rem;
+}
+
+.dropzone-text {
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  color: var(--text-color); // Ensure color contrast
+}
+
+.dropzone-subtext {
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
+  margin-bottom: 1rem;
+}
+
+.dropzone-button {
+  display: inline-block;
+  background: var(--accent-color);
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all var(--transition-speed) ease;
+  cursor: pointer;
+  border: none;
+  pointer-events: auto; // Make the button clickable
+
+  &:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+  }
+}
+
+.file-input {
+  // The hidden native input
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 1;
+  // display: none; // Using opacity 0 is often better for accessibility/events
+}
+
+.file-restrictions-info {
+  // Changed from form-field-description
+  font-size: 0.8rem; // Slightly smaller
+  color: var(--text-color-secondary);
+  margin-top: 0.75rem;
+  line-height: 1.4;
+}
+
+.file-preview-container {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.file-preview-item {
+  display: flex;
+  align-items: center;
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  width: calc(50% - 0.4rem); // Adjusted for gap
+  transition: all var(--transition-speed) ease, opacity 0.3s ease; // Add opacity transition
+  position: relative;
+  overflow: hidden; // Contain progress bar
+
+  &:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 2px 8px var(--box-shadow-color);
+  }
+}
+
+.file-icon {
+  font-size: 1.2rem;
+  color: var(--accent-color);
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+  width: 20px; // Give icon fixed width
+  text-align: center;
+}
+
+.file-info {
+  min-width: 0;
+  flex-grow: 1;
+  overflow: hidden; // Prevent long names breaking layout
+}
+
+.file-name {
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block; // Ensure ellipsis works
+  color: var(--text-color); // Ensure contrast
+}
+
+.file-meta {
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-color-secondary);
+}
+
+.file-size {
+  margin-right: 0.5rem;
+}
+
+.file-type {
+  text-transform: uppercase;
+}
+
+.file-remove {
+  color: var(--text-color-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-left: 0.5rem;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-speed) ease;
+  flex-shrink: 0;
+  z-index: 5; // Ensure clickable above other elements
+  background: none; // Ensure no background
+  border: none; // Ensure no border
+  padding: 0; // Ensure no padding
+
+  &:hover {
+    color: var(--error-color);
+    background: rgba(220, 53, 69, 0.1);
+    transform: rotate(90deg);
+  }
+}
+
+.file-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--accent-color);
+  border-radius: 0 0 0 8px;
+  transition: width 0.4s ease, opacity 0.3s ease 0.4s; // Match JS animation logic
+  width: 0%;
+  opacity: 1;
+}
+
+.file-error-text {
+  // Renamed from error-text
+  color: var(--error-color);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  min-height: 1.2em; // Reserve space like form-error
+}
+
+.hidden {
+  display: none !important; // Use important if needed to override other styles
+}
+
+// Ensure required indicators from _forms.scss work
+.required-indicator {
+  color: var(--error-color);
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+.optional-text {
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+  opacity: 0.7;
+  font-weight: normal;
+  margin-left: 4px;
+}
+
+
+@media (max-width: 640px) {
+  .file-upload-container {
+    padding: 1.5rem;
+  }
+
+  .file-preview-item {
+    width: 100%; // Full width on smaller screens
+    max-width: 100%;
+  }
+
+  .dropzone {
+    padding: 1.5rem 1rem;
+  }
+
+  .dropzone-icon {
+    font-size: 2rem;
+  }
+}
+
+// Added for form-field structure compatibility
+.form-field .file-upload-container {
+  margin-bottom: 0; // Remove bottom margin if nested in .form-field
+}

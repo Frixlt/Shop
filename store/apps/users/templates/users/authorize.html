@@ -20,6 +20,7 @@
       <h2 style="text-align: center; margin-bottom: 1.5rem;">Тест формы</h2>
       <form method="post"
             action="{% url 'users:authorize' %}"
+            enctype="multipart/form-data"
             novalidate
             id="test-auth-form">
         {% csrf_token %}

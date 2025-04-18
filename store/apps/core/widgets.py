@@ -245,4 +245,81 @@ class TextareaInput(django.forms.widgets.Textarea):
         return context
 
 
-# --- END TextareaInput ---
+class FileInput(django.forms.widgets.FileInput):
+    """
+    Custom file input widget with drag-and-drop support and file previews.
+    Relies on associated JavaScript (e.g., FileUpload class) for functionality.
+    """
+
+    template_name = "widgets/file_input.html"
+    label = None
+    is_required = False
+    default_config = {
+        "acceptedFormats": None,  # e.g., "image/*,.pdf" or ['image/png', '.docx']
+        "maxFileSize": 10 * 1024 * 1024,  # Bytes (10MB default)
+        "sizeCalculationMode": 1,  # 1: per file, 2: total
+        "maxFileCount": 1,  # Default to single file upload
+    }
+
+    def __init__(self, attrs=None, config=None):
+        attrs = attrs or {}
+        # Ensure the native input is hidden but functional
+        attrs["class"] = attrs.get("class", "") + " file-input"
+        # attrs['style'] = attrs.get('style', '') + ' opacity: 0; position: absolute; width: 1px; height: 1px; overflow: hidden;'
+        # Let CSS handle hiding via .file-input class
+
+        super().__init__(attrs=attrs)
+        self.config = self.default_config.copy()
+        if config:
+            # Basic merge, assuming keys match JS expectations (camelCase or snake_case handled in JS if needed)
+            self.config.update(config)
+
+        # Set 'multiple' attribute on the widget based on config
+        if self.config.get("maxFileCount", 1) > 1:
+            self.attrs["multiple"] = "multiple"
+        elif "multiple" in self.attrs:
+            # Ensure multiple is removed if maxFileCount is 1
+            del self.attrs["multiple"]
+
+    def _resolve_lazy_strings(self, data):
+        # Keep the existing helper method from SelectInput if needed, or simplify
+        if isinstance(data, dict):
+            return {key: self._resolve_lazy_strings(value) for key, value in data.items()}
+
+        if isinstance(data, list):
+            return [self._resolve_lazy_strings(item) for item in data]
+
+        if isinstance(data, Promise):
+            return force_str(data)
+
+        return data
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        widget_context = context.setdefault("widget", {})
+
+        # Pass necessary info to the template
+        widget_context["label"] = getattr(self, "label", None)
+        widget_context["is_required"] = getattr(self, "is_required", False)
+
+        # Resolve and serialize config for JS
+        resolved_config = self._resolve_lazy_strings(self.config)
+        widget_context["config_json"] = json.dumps(resolved_config)
+
+        # Derive IDs for JS hooks
+        native_input_id = widget_context["attrs"].get("id", f"id_{name}")
+        widget_context["container_id"] = f"{native_input_id}_container"
+        widget_context["dropzone_id"] = f"{native_input_id}_dropzone"
+        widget_context["preview_id"] = f"{native_input_id}_preview"
+        widget_context["error_id"] = f"{native_input_id}_error"
+        widget_context["select_btn_id"] = f"{native_input_id}_select_btn"
+        widget_context["clear_btn_id"] = f"{native_input_id}_clear_btn"
+        widget_context["restrictions_id"] = f"{native_input_id}_restrictions"
+
+        # Ensure native input has the correct ID
+        widget_context["attrs"]["id"] = native_input_id
+
+        # Pass allow_multiple_selected for template logic if needed (e.g., for hidden field array names)
+        widget_context["allow_multiple_selected"] = self.config.get("maxFileCount", 1) > 1
+
+        return context
