@@ -2,33 +2,74 @@
 <header class="header">
   <div class="container">
     <div class="header-content">
-      <div class="header-logo">
+      {# Logo Link #}
+      <a href="{% url 'catalog:item-list' %}"
+         class="header-logo"
+         aria-label="{% trans 'Go to Homepage' %}">
         <div class="logo-icon"></div>
         <div class="logo-text">Frixit Fresh</div>
-      </div>
+      </a>
+      {# Search Form #}
       <div class="header-search">
-        <form class="header-search-form">
+        <form class="header-search-form"
+              action="{% url 'catalog:item-list' %}"
+              method="get">
           <input type="text"
+                 name="q"
                  class="header-search-input"
-                 placeholder="{% trans 'Search products...' %}">
-          <button type="submit" class="header-search-button">
+                 placeholder="{% trans 'Search products...' %}"
+                 aria-label="{% trans 'Search products' %}">
+          <button type="submit"
+                  class="header-search-button"
+                  aria-label="{% trans 'Search' %}">
             <i class="fas fa-search"></i>
           </button>
         </form>
       </div>
       <div class="header-actions">
         <div class="header-actions-group">
-          <button class="header-action-button">
+          {# Cart Button - Ensure 'cart:detail' exists or change URL #}
+          <a href="#"
+             class="header-action-button"
+             aria-label="{% trans 'View Cart' %}"> {# Placeholder href #}
             <div class="icon-container">
               <i class="fas fa-shopping-cart"></i>
-              <span class="header-cart-count">3</span>
+              <span class="header-cart-count">0</span> {# Dynamic count needed #}
             </div>
             <span class="header-action-text">{% trans 'Cart' %}</span>
-          </button>
-          <button class="header-action-button">
-            <i class="fas fa-user"></i>
-            <span class="header-action-text">{% trans 'Profile' %}</span>
-          </button>
+          </a>
+          {# Profile/Login Button #}
+          {% if user.is_authenticated %}
+            {# Authenticated User: Profile Link - Ensure 'users:profile' exists or change URL #}
+            <a href="#"
+               class="header-action-button"
+               aria-label="{% trans 'View Profile' %}"> {# Placeholder href #}
+              <i class="fas fa-user"></i>
+              <span class="header-action-text">{% trans 'Profile' %}</span>
+            </a>
+            {# *** MODIFIED: Logout Button is now a FORM *** #}
+            <form action="{% url 'users:logout' %}"
+                  method="post"
+                  style="display: inline">
+              {# Keep form inline #}
+              {% csrf_token %}
+              <button type="submit"
+                      class="header-action-button"
+                      aria-label="{% trans 'Logout' %}">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="header-action-text">{% trans 'Logout' %}</span>
+              </button>
+            </form>
+            {# *** END Logout Form *** #}
+          {% else %}
+            {# Anonymous User: Login Link #}
+            <a href="{% url 'users:authorize' %}"
+               class="header-action-button"
+               aria-label="{% trans 'Login or Register' %}">
+              <i class="fas fa-lock"></i>
+              <span class="header-action-text">{% trans 'Login' %}</span>
+            </a>
+          {% endif %}
         </div>
       </div>
     </div>

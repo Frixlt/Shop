@@ -9,18 +9,18 @@
 // Общие компоненты, используемые на странице users
 @import 'modules/header';
 @import 'modules/footer';
-@import 'modules/tooltip';
-@import 'modules/error'; // Могут быть ошибки
+// @import 'modules/tooltip'; // Likely not needed on auth page
+// @import 'modules/error'; // Error styles are part of forms module
 
 // Модули, специфичные для users или имеющие особое значение здесь
-@import 'modules/forms'; // Общие стили для форм
+@import 'modules/forms'; // Общие стили для форм (контейнер, таб, кнопка, общие ошибки/успех)
 
 // Виджеты, используемые на странице users
-@import 'widgets/text_input'; // Стили для кастомного поля ввода
-@import 'widgets/select_input';
-@import 'widgets/checkbox_input'; // <--- ДОБАВЛЕН ИМПОРТ
-@import 'widgets/textarea_input'; // <--- ДОБАВЛЕН ИМПОРТ
-@import 'widgets/file_input';
+@import 'widgets/text_input'; // Стили для кастомного поля ввода (используется для text, email, password)
+// @import 'widgets/select_input'; // <--- REMOVED (unless you add a select field back)
+@import 'widgets/checkbox_input'; // Стили для кастомного чекбокса (для remember_me и terms)
+// @import 'widgets/textarea_input'; // <--- REMOVED (unless you add a textarea back)
+// @import 'widgets/file_input'; // <--- REMOVED (unless you add a file field back)
 
-// {WIP} Утилиты
-@import 'modules/show-grid';
+// {WIP} Утилиты (Optional)
+// @import 'modules/show-grid';

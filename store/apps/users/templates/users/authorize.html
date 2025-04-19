@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 {% load i18n static compress %}
 {% block title %}
-  {% trans "Authorization Test" %}
+  {% trans "Login / Registration" %}
 {% endblock title %}
 {% block css %}
+  {# --- Include CSS --- #}
   {% compress css %}
     <link rel="stylesheet"
           href="{% static 'scss/users.scss' %}"
@@ -15,30 +16,148 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 {% endblock css %}
 {% block content %}
-  <div class="container">
-    <div class="auth-container">
-      <h2 style="text-align: center; margin-bottom: 1.5rem;">Тест формы</h2>
-      <form method="post"
-            action="{% url 'users:authorize' %}"
-            enctype="multipart/form-data"
-            novalidate
-            id="test-auth-form">
-        {% csrf_token %}
-        {% for field in form %}{{ field }}{% endfor %}
-        <button type="submit" class="auth-button">Отправить</button>
-        <div id="form-generic-error"
-             class="form-error"
-             style="text-align: center;
-                    margin-top: 1rem;
-                    display: none"></div>
-      </form>
-      <div class="form-success" id="form-success" style="display: none;"></div>
+  <section>
+    <div class="container">
+      <div class="auth-container">
+        {# --- Tabs --- #}
+        <div class="auth-tabs">
+          <button class="auth-tab {% if active_form == 'login' %}active{% endif %}"
+                  data-form="login-form">{% trans "Login" %}</button>
+          <button class="auth-tab {% if active_form == 'register' %}active{% endif %}"
+                  data-form="register-form">{% trans "Registration" %}</button>
+          <div class="tab-indicator"></div>
+        </div>
+        {# --- Login Form --- #}
+        <form id="login-form"
+          class="auth-form {% if active_form == 'login' %}active{% endif %}"
+          method="post"
+          action="{% url 'users:authorize' %}" {# Ensure this URL name is correct #}
+          novalidate>
+          {% csrf_token %}
+          {# Hidden input to identify the form #}
+          <input type="hidden" name="form_type" value="login">
+          {# Generic Error Display Area for Login - Placed at the TOP #}
+          <div id="login-form-generic-error"
+               class="form-error form-error-generic"
+               style="display: none">
+            {# Content added by JS if login_form.non_field_errors exists server-side OR __all__ via AJAX #}
+            {% if login_form.non_field_errors %}
+              {% for error in login_form.non_field_errors %}<span>{{ error }}</span>{% endfor %}
+            {% endif %}
+          </div>
+          {# *** LOOPING THROUGH LOGIN FORM FIELDS *** #}
+          {% for field in login_form %}
+            {# Render the field using its associated widget template #}
+            {{ field }}
+            {# Special handling for placing 'Forgot Password?' after the 'remember_me' field #}
+            {% if field.name == 'remember_me' %}
+              <div class="form-field-extra"
+                   style="text-align: right;
+                          margin-top: -1rem;
+                          margin-bottom: 1.5rem">
+                {# Adjust styling as needed #}
+                <a href="{% url 'users:password_reset' %}" class="auth-link">{% trans "Forgot password?" %}</a>
+              </div>
+            {% endif %}
+          {% endfor %}
+          {# --- End Login Form Field Loop --- #}
+          <button type="submit" class="auth-button">
+            <i class="fas fa-sign-in-alt"></i> {% trans "Login" %}
+          </button>
+          <p class="auth-switch-text">
+            {% trans "No account?" %} <a href="#" class="auth-link" data-switch-tab="register-form">{% trans "Register" %}</a>
+          </p>
+        </form>
+        {# --- Registration Form --- #}
+        <form id="register-form"
+          class="auth-form {% if active_form == 'register' %}active{% endif %}"
+          method="post"
+          action="{% url 'users:authorize' %}" {# Same URL handles POST for both #}
+          novalidate>
+          {% csrf_token %}
+          {# Hidden input to identify the form #}
+          <input type="hidden" name="form_type" value="register">
+          {# Generic Error Display Area for Registration - Placed at the TOP #}
+          <div id="register-form-generic-error"
+               class="form-error form-error-generic"
+               style="display: none">
+            {# Content added by JS if register_form.non_field_errors exists server-side OR __all__ via AJAX #}
+            {% if register_form.non_field_errors %}
+              {% for error in register_form.non_field_errors %}<span>{{ error }}</span>{% endfor %}
+            {% endif %}
+          </div>
+          {# *** LOOPING THROUGH REGISTER FORM FIELDS *** #}
+          {% for field in register_form %}
+            {# Render the field using its associated widget template #}
+            {{ field }}
+          {% endfor %}
+          {# --- End Register Form Field Loop --- #}
+          <button type="submit" class="auth-button">
+            <i class="fas fa-user-plus"></i> {% trans "Register" %}
+          </button>
+          <p class="auth-switch-text">
+            {% trans "Already have an account?" %} <a href="#" class="auth-link" data-switch-tab="login-form">{% trans "Login" %}</a>
+          </p>
+        </form>
+        {# Success Message Area (shared or separate) #}
+        <div class="form-success" id="form-success" style="display: none;"></div>
+      </div>
     </div>
-  </div>
+  </section>
 {% endblock content %}
 {% block show_footer %}
+  {# Assuming footer is standard across pages #}
   {% include 'include/footer.html' %}
 {% endblock show_footer %}
 {% block extra_js %}
+  {# --- Include JS for Widgets and AJAX Submission --- #}
   <script type="module" src="{% static 'js/widgets/init.js' %}"></script>
+  {# --- Static JS for Tabs (Keep this simple) --- #}
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabs = document.querySelectorAll('.auth-tab');
+      const forms = document.querySelectorAll('.auth-form');
+      const switchLinks = document.querySelectorAll('.auth-link[data-switch-tab]');
+      const tabIndicator = document.querySelector('.tab-indicator');
+
+      function updateTabIndicator(activeTab) {
+        if (!tabIndicator || !activeTab || window.innerWidth <= 480) return;
+        tabIndicator.style.width = `${activeTab.offsetWidth}px`;
+        tabIndicator.style.left = `${activeTab.offsetLeft}px`;
+        // Apply transition *after* initial positioning might be smoother
+        requestAnimationFrame(() => {
+            tabIndicator.style.transition = 'left 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), width 0.3s cubic-bezier(0.645, 0.045, 0.355, 1)';
+        });
+      }
+
+      function setActiveTab(targetFormId) {
+        const activeTab = document.querySelector(`.auth-tab[data-form="${targetFormId}"]`);
+        if (!activeTab) return;
+
+        tabs.forEach(tab => tab.classList.toggle('active', tab === activeTab));
+        forms.forEach(form => {
+          const isActive = form.id === targetFormId;
+          form.classList.toggle('active', isActive);
+        });
+        updateTabIndicator(activeTab);
+      }
+
+      const initialActiveTab = document.querySelector('.auth-tab.active');
+      if (initialActiveTab) {
+         setTimeout(() => updateTabIndicator(initialActiveTab), 50); // Delay for layout
+      }
+      window.addEventListener('resize', () => {
+        const currentActiveTab = document.querySelector('.auth-tab.active');
+        if (currentActiveTab) updateTabIndicator(currentActiveTab);
+      });
+
+      tabs.forEach(tab => tab.addEventListener('click', () => setActiveTab(tab.getAttribute('data-form'))));
+      switchLinks.forEach(link => link.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveTab(link.getAttribute('data-switch-tab'));
+      }));
+
+      // Password toggle, validation, and AJAX submission are handled by init.js
+    });
+  </script>
 {% endblock extra_js %}
