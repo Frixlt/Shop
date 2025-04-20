@@ -1,10 +1,7 @@
-# --"--\Catalog\store\apps\core\forms.py"--
-
 import django.forms
 import django.forms.fields
 
-from . import widgets
-from . import validators
+from apps.core import validators, widgets
 
 __all__ = ("BaseForm",)
 
@@ -87,7 +84,7 @@ class BaseForm(django.forms.Form):
                     confirm_field_name=confirm_field_name,
                     message=mismatch_message,
                 )(
-                    self
+                    self,
                 )  # Call the validator instance with the form
 
         # --- File Upload Validation ---

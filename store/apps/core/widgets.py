@@ -6,7 +6,7 @@ from django.utils.encoding import force_str
 from django.utils.functional import Promise
 from django.utils.safestring import mark_safe
 
-__all__ = ("TextInput", "PasswordInput", "SelectInput", "CheckboxInput", "TextareaInput", "FileInput")
+__all__ = ["TextInput", "PasswordInput", "SelectInput", "CheckboxInput", "TextareaInput", "FileInput"]
 
 
 class TextInput(django.forms.widgets.TextInput):

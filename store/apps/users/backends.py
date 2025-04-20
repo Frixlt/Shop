@@ -2,8 +2,8 @@
 
 import django.conf
 import django.contrib.auth
-import django.contrib.auth.backends
 from django.contrib.auth import get_user_model
+import django.contrib.auth.backends
 import django.db.models
 from django.utils.translation import gettext_lazy as _
 

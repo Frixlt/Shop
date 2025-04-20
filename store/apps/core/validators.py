@@ -1,15 +1,13 @@
-# --"--\Catalog\store\apps\core\validators.py"--
-
 import django.core.exceptions
 from django.template.defaultfilters import filesizeformat
 from django.utils.translation import gettext_lazy as _
 
-__all__ = (
+__all__ = [
     "PhoneValidator",
     "PasswordConfirmValidator",
     "MultiSelectValidator",
     "FileUploadValidator",
-)
+]
 
 
 class PhoneValidator:

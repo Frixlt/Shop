@@ -4,7 +4,6 @@
   {% trans "Login / Registration" %}
 {% endblock title %}
 {% block css %}
-  {# --- Include CSS --- #}
   {% compress css %}
     <link rel="stylesheet"
           href="{% static 'scss/users.scss' %}"
@@ -29,38 +28,34 @@
         </div>
         {# --- Login Form --- #}
         <form id="login-form"
-          class="auth-form {% if active_form == 'login' %}active{% endif %}"
-          method="post"
-          action="{% url 'users:authorize' %}" {# Ensure this URL name is correct #}
-          novalidate>
+              class="auth-form {% if active_form == 'login' %}active{% endif %}"
+              method="post"
+              action="{% url 'users:authorize' %}"
+              novalidate>
           {% csrf_token %}
-          {# Hidden input to identify the form #}
           <input type="hidden" name="form_type" value="login">
-          {# Generic Error Display Area for Login - Placed at the TOP #}
+          {# *** ADD HIDDEN 'next' INPUT *** #}
+          <input type="hidden" name="next" value="{{ next }}">
+          {# Generic Error Display Area #}
           <div id="login-form-generic-error"
                class="form-error form-error-generic"
                style="display: none">
-            {# Content added by JS if login_form.non_field_errors exists server-side OR __all__ via AJAX #}
             {% if login_form.non_field_errors %}
               {% for error in login_form.non_field_errors %}<span>{{ error }}</span>{% endfor %}
             {% endif %}
           </div>
-          {# *** LOOPING THROUGH LOGIN FORM FIELDS *** #}
+          {# *** LOGIN FORM FIELDS *** #}
           {% for field in login_form %}
-            {# Render the field using its associated widget template #}
             {{ field }}
-            {# Special handling for placing 'Forgot Password?' after the 'remember_me' field #}
             {% if field.name == 'remember_me' %}
               <div class="form-field-extra"
                    style="text-align: right;
                           margin-top: -1rem;
                           margin-bottom: 1.5rem">
-                {# Adjust styling as needed #}
                 <a href="{% url 'users:password_reset' %}" class="auth-link">{% trans "Forgot password?" %}</a>
               </div>
             {% endif %}
           {% endfor %}
-          {# --- End Login Form Field Loop --- #}
           <button type="submit" class="auth-button">
             <i class="fas fa-sign-in-alt"></i> {% trans "Login" %}
           </button>
@@ -70,28 +65,24 @@
         </form>
         {# --- Registration Form --- #}
         <form id="register-form"
-          class="auth-form {% if active_form == 'register' %}active{% endif %}"
-          method="post"
-          action="{% url 'users:authorize' %}" {# Same URL handles POST for both #}
-          novalidate>
+              class="auth-form {% if active_form == 'register' %}active{% endif %}"
+              method="post"
+              action="{% url 'users:authorize' %}"
+              novalidate>
           {% csrf_token %}
-          {# Hidden input to identify the form #}
           <input type="hidden" name="form_type" value="register">
-          {# Generic Error Display Area for Registration - Placed at the TOP #}
+          {# *** ADD HIDDEN 'next' INPUT *** #}
+          <input type="hidden" name="next" value="{{ next }}">
+          {# Generic Error Display Area #}
           <div id="register-form-generic-error"
                class="form-error form-error-generic"
                style="display: none">
-            {# Content added by JS if register_form.non_field_errors exists server-side OR __all__ via AJAX #}
             {% if register_form.non_field_errors %}
               {% for error in register_form.non_field_errors %}<span>{{ error }}</span>{% endfor %}
             {% endif %}
           </div>
-          {# *** LOOPING THROUGH REGISTER FORM FIELDS *** #}
-          {% for field in register_form %}
-            {# Render the field using its associated widget template #}
-            {{ field }}
-          {% endfor %}
-          {# --- End Register Form Field Loop --- #}
+          {# *** REGISTER FORM FIELDS *** #}
+          {% for field in register_form %}{{ field }}{% endfor %}
           <button type="submit" class="auth-button">
             <i class="fas fa-user-plus"></i> {% trans "Register" %}
           </button>
@@ -99,7 +90,7 @@
             {% trans "Already have an account?" %} <a href="#" class="auth-link" data-switch-tab="login-form">{% trans "Login" %}</a>
           </p>
         </form>
-        {# Success Message Area (shared or separate) #}
+        {# Success Message Area #}
         <div class="form-success" id="form-success" style="display: none;"></div>
       </div>
     </div>

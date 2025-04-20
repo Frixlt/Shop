@@ -7,6 +7,7 @@ import django.views.i18n
 
 import apps.catalog.urls
 import apps.users.urls
+from apps.users.views import AuthorizeView
 
 urlpatterns = [
     django.urls.path(
@@ -31,6 +32,11 @@ urlpatterns = [
         "jsi18n/",
         django.views.i18n.JavaScriptCatalog.as_view(),
         name="jsi18n",
+    ),
+    django.urls.path(
+        "admin/login/",
+        AuthorizeView.as_view(),
+        name="admin_login_override",
     ),
     django.urls.path(
         "admin/",

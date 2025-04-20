@@ -1,8 +1,8 @@
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import PasswordResetView
 import django.urls
 
 import apps.users.views
-from django.contrib.auth import views as auth_views
 
 app_name = "users"
 
@@ -20,10 +20,8 @@ urlpatterns = [
     django.urls.path(
         "logout/",
         auth_views.LogoutView.as_view(
-            # Optional: Specify where to redirect after logout
-            # By default, it redirects to settings.LOGOUT_REDIRECT_URL or '/'
-            # next_page=django.urls.reverse_lazy("catalog:item-list"),  # Example redirect
+            next_page=django.urls.reverse_lazy("catalog:item-list"),
         ),
-        name="logout",  # This name matches the one used in the template {% url 'users:logout' %}
+        name="logout",
     ),
 ]

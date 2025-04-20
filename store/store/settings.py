@@ -1,5 +1,4 @@
 import pathlib
-
 import decouple
 from django.utils.translation import gettext_lazy as _
 
@@ -161,6 +160,11 @@ STATIC_ROOT = BASE_DIR / "static"
 MEDIA_ROOT = BASE_DIR / "media/"
 
 MEDIA_URL = "media/"
+
+
+LOGIN_URL = "users.views.AuthorizeView"
+
+LOGOUT_REDIRECT_URL = "/"
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
