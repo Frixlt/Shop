@@ -1,40 +1,27 @@
 {# --"--\Catalog\store\apps\core\templates\widgets\checkbox_input.html"-- #}
-{% comment %}
-Шаблон для кастомного CheckboxInput.
-Использует скрытый нативный input и видимый кастомный элемент.
-{% endcomment %}
 <div class="form-field checkbox-field">
-  {# <--- Основной контейнер поля #}
-  {# Контейнер для позиционирования кастомного чекбокса и обработки кликов по нему #}
+  {# JS добавит класс 'error' сюда при ошибке фронтенда #}
   <div class="checkbox-custom-container">
-    {# Настоящий чекбокс, скрытый стилями #}
     <input type="checkbox"
       name="{{ widget.name }}"
       {% if widget.attrs.id %}id="{{ widget.attrs.id }}"{% endif %}
-      class="checkbox-input" {# <--- Класс для JS и скрытия #}
+      class="checkbox-input" {# Django добавит класс 'error' сюда при серверной ошибке #}
       {% if widget.value != None %}value="{{ widget.value|stringformat:'s' }}"{% endif %}
       {% if widget.check_test %}checked{% endif %}
       {% if widget.is_required %}required{% endif %}
       {% for attr_name, attr_value in widget.attrs.items %}
         {% if attr_name != "id" and attr_name != "class" %}{{ attr_name }}{% if attr_value is not True %}="{{ attr_value }}"{% endif %}{% endif %}
       {% endfor %}>
-      {# Видимый кастомный элемент чекбокса #}
-      <span class="checkbox-custom" aria-hidden="true"></span> {# <--- Класс для стилизации #}
+      <span class="checkbox-custom" aria-hidden="true"></span>
     </div>
-    {# Метка поля (кликабельная, связана с ID нативного инпута) #}
     {% if widget.label %}
       <label for="{{ widget.attrs.id }}" class="checkbox-label">
-        {# Используем |safe для рендеринга HTML (ссылок) #}
         {{ widget.label|safe }}
-        {# --- ADDED: Required Indicator --- #}
         {% if widget.is_required %}<span class="required-indicator">*</span>{% endif %}
-        {# --- END ADDED --- #}
-      </label>
-    {% endif %}
-    {# Блок ошибки ВНУТРИ контейнера .checkbox-field #}
-    <div class="form-error"
-         {% if widget.attrs.id %}id="{{ widget.attrs.id }}-error"{% endif %}>
-      {# Сообщение об ошибке будет управляться JS #}
+        </label>
+      {% endif %}
+      {# Контейнер для ошибок ФРОНТЕНДА (JS) #}
+      <div class="form-error"
+           id="{{ widget.attrs.id }}-error"
+           style="display: none">{% comment %} Сюда JS будет вставлять текст ошибки {% endcomment %}</div>
     </div>
-  </div>
-  {# <--- Конец .form-field.checkbox-field #}

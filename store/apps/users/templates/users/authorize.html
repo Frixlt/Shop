@@ -1,3 +1,4 @@
+{# --"--\Catalog\store\apps\users\templates\users\authorize.html"-- #}
 {% extends 'base.html' %}
 {% load i18n static compress %}
 {% block title %}
@@ -18,7 +19,6 @@
   <section>
     <div class="container">
       <div class="auth-container">
-        {# --- Tabs --- #}
         <div class="auth-tabs">
           <button class="auth-tab {% if active_form == 'login' %}active{% endif %}"
                   data-form="login-form">{% trans "Login" %}</button>
@@ -34,19 +34,24 @@
               novalidate>
           {% csrf_token %}
           <input type="hidden" name="form_type" value="login">
-          {# *** ADD HIDDEN 'next' INPUT *** #}
           <input type="hidden" name="next" value="{{ next }}">
-          {# Generic Error Display Area #}
-          <div id="login-form-generic-error"
-               class="form-error form-error-generic"
-               style="display: none">
-            {% if login_form.non_field_errors %}
-              {% for error in login_form.non_field_errors %}<span>{{ error }}</span>{% endfor %}
-            {% endif %}
-          </div>
-          {# *** LOGIN FORM FIELDS *** #}
+          {# Generic non-field errors (e.g., authentication failed) #}
+          {% if login_form.non_field_errors %}
+            <div class="form-error-generic">
+              {% for error in login_form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+          {% endif %}
           {% for field in login_form %}
+            {# Render the field using its widget template #}
             {{ field }}
+            {# Display Django field errors *after* the field is rendered #}
+            {% if field.errors %}
+              {# This wrapper div will be styled by the new CSS rules #}
+              <div class="django-field-error">
+                {{ field.errors }} {# Django renders ul.errorlist here #}
+              </div>
+            {% endif %}
+            {# Special handling for forgot password link (placed outside form-field) #}
             {% if field.name == 'remember_me' %}
               <div class="form-field-extra"
                    style="text-align: right;
@@ -71,18 +76,24 @@
               novalidate>
           {% csrf_token %}
           <input type="hidden" name="form_type" value="register">
-          {# *** ADD HIDDEN 'next' INPUT *** #}
           <input type="hidden" name="next" value="{{ next }}">
-          {# Generic Error Display Area #}
-          <div id="register-form-generic-error"
-               class="form-error form-error-generic"
-               style="display: none">
-            {% if register_form.non_field_errors %}
-              {% for error in register_form.non_field_errors %}<span>{{ error }}</span>{% endfor %}
+          {# Generic non-field errors #}
+          {% if register_form.non_field_errors %}
+            <div class="form-error-generic">
+              {% for error in register_form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+          {% endif %}
+          {% for field in register_form %}
+            {# Render the field using its widget template #}
+            {{ field }}
+            {# Display Django field errors *after* the field is rendered #}
+            {% if field.errors %}
+              {# This wrapper div will be styled by the new CSS rules #}
+              <div class="django-field-error">
+                {{ field.errors }} {# Django renders ul.errorlist here #}
+              </div>
             {% endif %}
-          </div>
-          {# *** REGISTER FORM FIELDS *** #}
-          {% for field in register_form %}{{ field }}{% endfor %}
+          {% endfor %}
           <button type="submit" class="auth-button">
             <i class="fas fa-user-plus"></i> {% trans "Register" %}
           </button>
@@ -90,21 +101,17 @@
             {% trans "Already have an account?" %} <a href="#" class="auth-link" data-switch-tab="login-form">{% trans "Login" %}</a>
           </p>
         </form>
-        {# Success Message Area #}
-        <div class="form-success" id="form-success" style="display: none;"></div>
       </div>
     </div>
   </section>
 {% endblock content %}
 {% block show_footer %}
-  {# Assuming footer is standard across pages #}
   {% include 'include/footer.html' %}
 {% endblock show_footer %}
 {% block extra_js %}
-  {# --- Include JS for Widgets and AJAX Submission --- #}
   <script type="module" src="{% static 'js/widgets/init.js' %}"></script>
-  {# --- Static JS for Tabs (Keep this simple) --- #}
   <script>
+    // Keep the tab switching logic
     document.addEventListener('DOMContentLoaded', () => {
       const tabs = document.querySelectorAll('.auth-tab');
       const forms = document.querySelectorAll('.auth-form');
@@ -115,7 +122,6 @@
         if (!tabIndicator || !activeTab || window.innerWidth <= 480) return;
         tabIndicator.style.width = `${activeTab.offsetWidth}px`;
         tabIndicator.style.left = `${activeTab.offsetLeft}px`;
-        // Apply transition *after* initial positioning might be smoother
         requestAnimationFrame(() => {
             tabIndicator.style.transition = 'left 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), width 0.3s cubic-bezier(0.645, 0.045, 0.355, 1)';
         });
@@ -135,7 +141,7 @@
 
       const initialActiveTab = document.querySelector('.auth-tab.active');
       if (initialActiveTab) {
-         setTimeout(() => updateTabIndicator(initialActiveTab), 50); // Delay for layout
+         setTimeout(() => updateTabIndicator(initialActiveTab), 50);
       }
       window.addEventListener('resize', () => {
         const currentActiveTab = document.querySelector('.auth-tab.active');
@@ -147,8 +153,6 @@
         e.preventDefault();
         setActiveTab(link.getAttribute('data-switch-tab'));
       }));
-
-      // Password toggle, validation, and AJAX submission are handled by init.js
     });
   </script>
 {% endblock extra_js %}

@@ -1,5 +1,4 @@
 // --"--\Catalog\store\static_dev\scss\modules\_forms.scss"--
-
 // --- Sass Variables (Imported or defined elsewhere) ---
 // Assuming $border-radius, $font-family-button, $transition-speed are available
 // Assuming CSS Variables like --error-color, --error-color-rgb, --accent-color, etc. are available
@@ -131,7 +130,7 @@
   font-size: 0.9rem;
   font-weight: 500;
   position: relative;
-  display: none; // Shown by JS
+  display: block; // Shown by default if rendered by Django
   line-height: 1.5;
   text-align: left;
   transition: opacity 0.3s ease-in-out;
@@ -150,6 +149,13 @@
 
   &.shake {
     animation: shake 0.4s linear;
+  }
+
+  // Target potential spans or direct text inside
+  span,
+  p {
+    margin: 0;
+    padding: 0;
   }
 }
 
@@ -206,6 +212,14 @@
   &:has(.radio-group) {
     margin-bottom: 0.8rem;
   }
+
+  // --- Add margin below field if Django error follows ---
+  // Select .form-field that is immediately followed by .django-field-error
+  // Note: This might not work reliably depending on exact HTML structure/whitespace.
+  // It's safer to control spacing via the error block's margin-top.
+  // & + .django-field-error {
+  //   margin-top: -0.7rem; // Pull error closer if needed
+  // }
 }
 
 
@@ -268,15 +282,22 @@
 }
 
 
-// --- Field-Specific Error Message (Directly Below Field) ---
-// Target errors within the main field container or checkbox container
+// --- Field-Specific Error Message (Client-Side - JS Controlled) ---
+// Target errors within the main field container or specific widget containers
 .form-field>.form-error,
-.checkbox-field>.form-error {
-  // Checkbox errors are inside checkbox-field div
+// Standard fields
+.checkbox-field>.form-error,
+// Checkboxes
+.file-upload-container>.file-error-text,
+// File inputs (using its specific class)
+.django-custom-select-widget~.form-error // Select input (error div is AFTER widget)
+
+  {
   color: var(--error-color);
   font-size: 0.85rem;
+  font-weight: 500; // Added for consistency
   margin-top: 0.3rem; // Space above the error message
-  display: none; // Hidden by default
+  display: none; // Hidden by default (JS shows it)
   min-height: 1.2em; // Reserve space to prevent layout shifts
   width: 100%;
   text-align: left; // Align error text left
@@ -287,6 +308,34 @@
   }
 }
 
+// --- Django Field Error Styling (Server-Side) ---
+// Targets the wrapper div around Django's ul.errorlist
+.django-field-error {
+  margin-top: 0.3rem; // Space above the error block (Consistent with JS error)
+  padding: 0; // No padding needed on the wrapper itself
+  width: 100%; // Ensure it takes full width
+
+  .errorlist {
+    list-style: none; // Remove bullet points
+    padding: 0;
+    margin: 0;
+    color: var(--error-color); // Use error color variable
+    font-size: 0.85rem; // Match JS error font size
+    font-weight: 500; // Match JS error font weight
+    text-align: left; // Ensure left alignment
+
+    li {
+      margin-bottom: 0.25rem; // Space between multiple errors for the same field
+      line-height: 1.4; // Improve readability
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+// --- End Django Field Error Styling ---
 
 // --- Widget styles are imported separately ---
 // Example:

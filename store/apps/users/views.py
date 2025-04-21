@@ -1,8 +1,9 @@
-from django.contrib import auth
-from django.http import JsonResponse
-from django.utils.http import url_has_allowed_host_and_scheme
+# --"--\Catalog\store\apps\users\views.py"--
+import django.contrib.auth
+import django.contrib.messages
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.views import View
 
@@ -12,18 +13,12 @@ __all__ = ("AuthorizeView",)
 
 
 class AuthorizeView(View):
-    """Handles both login and registration display (GET) and submission (POST)."""
-
     template_name = "users/authorize.html"
     login_form_class = LoginForm
     register_form_class = RegisterForm
     success_url_name = "catalog:item-list"
 
     def get_success_url(self, request):
-        """
-        Returns the URL to redirect to on successful login/registration.
-        Checks for a 'next' parameter first.
-        """
         next_url = request.POST.get("next", request.GET.get("next"))
         is_safe = url_has_allowed_host_and_scheme(
             url=next_url,
@@ -45,11 +40,12 @@ class AuthorizeView(View):
         login_form = self.login_form_class()
         register_form = self.register_form_class()
         next_url = request.GET.get("next")
+        active_form = request.session.pop("active_form", "login")
 
         context = {
             "login_form": login_form,
             "register_form": register_form,
-            "active_form": "login",
+            "active_form": active_form,
             "next": next_url or "",
         }
         return render(request, self.template_name, context)
@@ -59,7 +55,10 @@ class AuthorizeView(View):
             return redirect(self.get_success_url(request))
 
         form_type = request.POST.get("form_type")
-        form = None
+        login_form = self.login_form_class()
+        register_form = self.register_form_class()
+        active_form = form_type
+        next_url = request.POST.get("next", "")
         redirect_url = self.get_success_url(request)
 
         if form_type == "login":
@@ -68,45 +67,47 @@ class AuthorizeView(View):
                 identifier = form.cleaned_data.get("identifier")
                 password = form.cleaned_data.get("password")
                 remember_me = form.cleaned_data.get("remember_me")
-                user = auth.authenticate(request, username=identifier, password=password)
+                user = django.contrib.auth.authenticate(request, username=identifier, password=password)
 
                 if user is not None:
-                    auth.login(request, user)
+                    django.contrib.auth.login(request, user)
                     if not remember_me:
                         request.session.set_expiry(0)
-                    return JsonResponse(
-                        {
-                            "status": "success",
-                            "message": _("Login successful! Redirecting..."),
-                            "redirect_url": redirect_url,
-                        }
-                    )
+                    django.contrib.messages.success(request, _("Login successful! Welcome back."))
+                    return redirect(redirect_url)
                 else:
-                    form.add_error(None, _("Invalid username/email or password."))
-
-            return JsonResponse({"status": "error", "errors": form.errors}, status=400)
+                    django.contrib.messages.error(request, _("Invalid username/email or password."))
+                    active_form = "login"
+            else:
+                django.contrib.messages.error(request, _("Please correct the errors below."))
+                active_form = "login"
+                login_form = form
 
         elif form_type == "register":
             form = self.register_form_class(request.POST)
             if form.is_valid():
                 try:
                     user = form.save(commit=True)
-                    auth.login(request, user)
-                    return JsonResponse(
-                        {
-                            "status": "success",
-                            "message": _("Registration successful! Redirecting..."),
-                            "redirect_url": redirect_url,
-                        }
-                    )
-
+                    django.contrib.auth.login(request, user)
+                    django.contrib.messages.success(request, _("Registration successful! Welcome."))
+                    return redirect(redirect_url)
                 except Exception as e:
                     print(f"Unexpected Error during registration save/login: {e}")
-                    form.add_error(None, _("An unexpected error occurred. Please try again."))
-
-            return JsonResponse({"status": "error", "errors": form.errors}, status=400)
-
+                    django.contrib.messages.error(request, _("An unexpected error occurred. Please try again."))
+                    active_form = "register"
+            else:
+                django.contrib.messages.error(request, _("Please correct the registration errors below."))
+                active_form = "register"
+                register_form = form
         else:
-            return JsonResponse(
-                {"status": "error", "errors": {"__all__": [_("Invalid form submission type.")]}}, status=400
-            )
+            django.contrib.messages.error(request, _("Invalid form submission type."))
+            active_form = "login"
+
+        request.session["active_form"] = active_form
+        context = {
+            "login_form": login_form,
+            "register_form": register_form,
+            "active_form": active_form,
+            "next": next_url,
+        }
+        return render(request, self.template_name, context)

@@ -1,26 +1,13 @@
 {# --"--\Catalog\store\apps\core\templates\widgets\file_input.html"-- #}
-{% comment %}
-Template for the custom FileInput widget.
-Renders the dropzone, preview area, and hidden native input.
-Relies on JavaScript (FileUpload class) initialized in init.js.
-Context variables:
-- widget.label
-- widget.is_required
-- widget.attrs.id (used to derive other IDs)
-- widget.config_json (JSON string of configuration for JS)
-- widget.container_id, widget.dropzone_id, widget.preview_id, widget.error_id, etc. (Derived IDs for JS)
-- widget.allow_multiple_selected (Boolean)
-{% endcomment %}
 {% load i18n %}
 <div class="form-field">
-  {# Main container for the widget, identifiable by JS #}
+  {# Контейнер виджета #}
   <div id="{{ widget.container_id }}"
-       class="file-upload-container"
-       data-config="{{ widget.config_json|escape }}">
+    class="file-upload-container" {# JS добавит класс 'upload-error' сюда при ошибке фронтенда #}
+    data-config="{{ widget.config_json|escape }}">
     <div class="file-field-header">
-      {# Use the field's label #}
       {% if widget.label %}
-        <span id="{{ widget.attrs.id }}-label" class="file-field-label"> {# Added ID for aria-labelledby #}
+        <span id="{{ widget.attrs.id }}-label" class="file-field-label">
           {{ widget.label }}
           {% if widget.is_required %}<span class="required-indicator">*</span>{% endif %}
         </span>
@@ -38,53 +25,37 @@ Context variables:
         </button>
       </div>
     </div>
-    {# The Dropzone Area #}
     <div class="dropzone"
          id="{{ widget.dropzone_id }}"
          role="group"
          aria-labelledby="{{ widget.attrs.id }}-label">
-      {# Hidden Native File Input - Rendered by Django's default widget handling #}
-      {# We include it here to ensure it's inside the dropzone structure if needed, #}
-      {# but styled to be invisible. The name and ID come from widget context. #}
       <input type="file"
         name="{{ widget.name }}"
         id="{{ widget.attrs.id }}"
-        class="file-input" {# Class for CSS hiding and JS selection #}
+        class="file-input" {# Django добавит класс 'error' сюда при серверной ошибке #}
         {% if widget.allow_multiple_selected %}multiple{% endif %}
-        {# Add other attributes from the widget if necessary, like 'accept' #}
         {% for attr_name, attr_value in widget.attrs.items %}
           {% if attr_name != "id" and attr_name != "class" and attr_name != "multiple" and attr_name != "name" %}
             {{ attr_name }}{% if attr_value is not True %}="{{ attr_value }}"{% endif %}
           {% endif %}
         {% endfor %}
-        {# Removed 'required' here as JS handles validation UI #}
         >
-        {# Visible Dropzone Content #}
         <div class="dropzone-content">
           <div class="dropzone-icon">
             <i class="fas fa-cloud-upload-alt"></i>
           </div>
           <div class="dropzone-text">{% trans "Drag & drop files here" %}</div>
           <div class="dropzone-subtext">{% trans "Or click to browse your device" %}</div>
-          {# This button is primarily visual; the click is handled by JS on the dropzone/select button #}
           <span class="dropzone-button">{% trans "Browse Files" %}</span>
         </div>
       </div>
-      {# File Restrictions Info and Error Message Area #}
       <p class="file-restrictions-info" id="{{ widget.restrictions_id }}">{% trans "Loading restrictions..." %}</p>
-      <p class="file-error-text hidden" id="{{ widget.error_id }}"></p>
-      {# Error messages shown by JS #}
-      {# File Preview Container #}
+      {# Контейнер для ошибок ФРОНТЕНДА (JS) #}
+      <div class="file-error-text hidden" id="{{ widget.error_id }}">
+        {% comment %} Сюда JS будет вставлять текст ошибки {% endcomment %}
+      </div>
       <div class="file-preview-container" id="{{ widget.preview_id }}">
         {# File previews will be added here by JavaScript #}
       </div>
     </div>
-    {# End .file-upload-container #}
-    {# Django's default error display (usually hidden/replaced by JS) #}
-    {% if widget.errors %}
-      <ul class="errorlist">
-        {% for error in widget.errors %}<li>{{ error }}</li>{% endfor %}
-      </ul>
-    {% endif %}
   </div>
-  {# End .form-field #}

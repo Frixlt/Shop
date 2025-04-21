@@ -1,3 +1,4 @@
+// --"--\Catalog\store\static_dev\scss\modules\_styles.scss"--
 *,
 *::before,
 *::after {
@@ -80,6 +81,80 @@ main {
   width: 100%;
   overflow-x: hidden;
 }
+
+// --- Django Messages Styling ---
+.messages-container {
+  position: fixed;
+  top: 80px; // Adjust as needed, below header
+  right: 20px;
+  z-index: 1100; // High z-index
+  width: auto;
+  max-width: 400px;
+}
+
+.message {
+  background-color: var(--card-bg); // Use card background or similar
+  color: var(--text-color);
+  padding: 1rem 2.5rem 1rem 1.5rem; // Space for close button
+  margin-bottom: 1rem;
+  border-radius: $border-radius;
+  border-left: 5px solid var(--text-color-secondary); // Default border
+  box-shadow: 0 4px 15px var(--box-shadow-color);
+  position: relative;
+  opacity: 0;
+  transform: translateX(20px);
+  animation: slideInMessage 0.4s ease forwards;
+  font-size: 0.95rem;
+  line-height: 1.5;
+
+  &.debug {
+    border-left-color: #6c757d;
+  }
+
+  &.info {
+    border-left-color: #0dcaf0;
+  }
+
+  &.success {
+    border-left-color: var(--accent-color);
+  }
+
+  &.warning {
+    border-left-color: #ffc107;
+  }
+
+  &.error {
+    border-left-color: var(--error-color);
+  }
+}
+
+.message-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--text-color-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInMessage {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// --- End Django Messages Styling ---
 
 @media (max-width: 1200px) {
   .footer {
@@ -203,6 +278,14 @@ main {
 
   .logo-text {
     font-size: 22px;
+  }
+
+  .messages-container {
+    top: 70px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+    width: calc(100% - 20px);
   }
 }
 
