@@ -1,15 +1,8 @@
 // --"--\Catalog\store\static_dev\scss\modules\_header.scss"--
-
 .header {
   width: 100%;
   padding: 1rem 0;
   transition: all $transition-speed ease;
-  // Add position sticky and background if needed for sticky header effect
-  // position: sticky;
-  // top: 0;
-  // background: var(--section-bg); // Or appropriate header background
-  // z-index: 100; // Ensure it stays on top
-  // box-shadow: 0 2px 5px var(--box-shadow-color); // Optional shadow for sticky header
 }
 
 .header-content {
@@ -20,13 +13,12 @@
   min-height: 60px;
 }
 
-// Target the <a> tag which now has the header-logo class
 .header-logo {
   display: flex;
   align-items: center;
   gap: 10px;
-  text-decoration: none; // *** ADD THIS LINE TO REMOVE UNDERLINE ***
-  color: inherit; // Ensure the text color is inherited correctly
+  text-decoration: none;
+  color: inherit;
 }
 
 .logo-icon {
@@ -35,20 +27,16 @@
   background-image: var(--logo-svg);
   background-size: contain;
   background-repeat: no-repeat;
-  transition: transform $transition-speed ease; // Optional hover effect
+  transition: transform $transition-speed ease;
 }
 
-// Optional: Add hover effect for logo if desired
-.header-logo:hover .logo-icon {
-  // transform: rotate(5deg) scale(1.05);
-}
+.header-logo:hover .logo-icon {}
 
 .logo-text {
-  font-family: $font-family-heading; // Use specific heading font if defined
+  font-family: $font-family-heading;
   font-size: 26px;
-  color: var(--text-color); // Use main text color variable
-  font-weight: 700; // Example weight
-  // No text-decoration needed here if set on parent .header-logo
+  color: var(--text-color);
+  font-weight: 700;
 }
 
 .header-search {
@@ -91,7 +79,7 @@
   transition: color $transition-speed ease;
 
   &:hover {
-    color: var(--accent-color); // Example hover color
+    color: var(--accent-color);
   }
 }
 
@@ -103,94 +91,87 @@
 
 .header-actions-group {
   display: flex;
-  gap: 1.5rem; // Adjust gap as needed
+  gap: 1.5rem;
   align-items: center;
 }
 
-// Style both <a> and <button> used as action items similarly
 .header-action-button {
   position: relative;
   background: none;
   border: none;
   color: var(--text-color);
-  font-size: 1.5rem; // Icon size
+  font-size: 1.5rem;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 60px; // Ensure consistent height
+  min-height: 60px;
   padding: 5px;
   line-height: 1;
-  text-decoration: none; // Remove underline from potential <a> tags
+  text-decoration: none;
   transition: color $transition-speed ease;
 
-  // Add hover effect
   &:hover {
     color: var(--accent-color);
   }
 
-  // Ensure form button styling looks like a link button
-  &[type="submit"] {
-    // Inherit styles or add specific overrides if needed
-  }
+  &[type="submit"] {}
 }
 
 .header-action-button i {
   vertical-align: middle;
-  width: 24px; // Fixed icon width
-  height: 24px; // Fixed icon height
-  margin-bottom: 0.25rem; // Space between icon and text
+  width: 24px;
+  height: 24px;
+  margin-bottom: 0.25rem;
 }
 
 .header-action-text {
   font-family: $font-family-base;
   font-size: 0.75rem;
-  // margin-top: 0.25rem; // Replaced by icon margin-bottom
-  text-align: center; // Center text below icon
-  display: block; // Ensure it takes space
+  text-align: center;
+  display: block;
 }
 
 .icon-container {
   position: relative;
-  display: inline-block; // Needed for absolute positioning of count
+  display: inline-block;
 }
 
 .header-cart-count {
   position: absolute;
-  top: -8px; // Adjust positioning as needed
-  right: -8px; // Adjust positioning as needed
-  background-color: var(--header-cart-count-bg, $red); // Use variable or default
-  color: var(--header-cart-count-text, $white); // Use variable or default
+  top: -8px;
+  right: -8px;
+  background-color: var(--header-cart-count-bg, $red);
+  color: var(--header-cart-count-text, $white);
   font-size: 0.7rem;
   font-weight: bold;
   padding: 1px 4px;
-  border-radius: 50%; // Make it circular
-  min-width: 16px; // Ensure minimum size
+  border-radius: 50%;
+  min-width: 16px;
   min-height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  z-index: 1; // Ensure it's above the icon
+  z-index: 1;
 }
 
-// --- Responsiveness (Example from _styles.scss, ensure consistency) ---
 @media (max-width: 768px) {
   .header-action-button .header-action-text {
-    display: none; // Hide text on smaller screens
+    display: none;
   }
 
   .header-action-button i {
-    margin-bottom: 0; // Remove margin when text is hidden
+    margin-bottom: 0;
   }
 
   .header-actions {
-    gap: 1rem; // Reduce gap
+    gap: 1rem;
   }
 
   .header-actions-group {
-    gap: 1rem; // Reduce gap
+    gap: 1rem;
   }
 }
 
@@ -217,7 +198,7 @@
   }
 
   .header-action-button {
-    font-size: 1.3rem; // Slightly smaller icons
+    font-size: 1.3rem;
     min-height: 50px;
   }
 

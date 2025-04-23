@@ -2,7 +2,7 @@
 import django.contrib.auth
 import django.contrib.auth.decorators
 import django.contrib.messages
-from django.core.exceptions import ValidationError  # Import ValidationError
+from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
@@ -10,10 +10,13 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import TemplateView
+from django.contrib.auth import get_user_model
 
 from apps.users.forms import LoginForm, RegisterForm, ProfileUpdateForm
 
 __all__ = ("AuthorizeView", "ProfileView")
+
+UserModel = get_user_model()
 
 
 class AuthorizeView(View):
@@ -80,12 +83,9 @@ class AuthorizeView(View):
                     django.contrib.messages.success(request, _("Login successful! Welcome back."))
                     return redirect(redirect_url)
                 else:
-                    # Use the specific error message from the backend if available
                     auth_error = _("Invalid username/email or password.")
-                    # You might add more specific checks here based on backend logic if needed
                     django.contrib.messages.error(request, auth_error)
                     active_form = "login"
-                    # Pass the invalid form back to the template
                     login_form = form
             else:
                 django.contrib.messages.error(request, _("Please correct the errors below."))
@@ -97,10 +97,7 @@ class AuthorizeView(View):
             if form.is_valid():
                 try:
                     user = form.save(commit=True)
-                    # Optionally log the user in immediately after registration
-                    django.contrib.auth.login(
-                        request, user, backend="apps.users.backends.EmailOrUsernameBackend"
-                    )  # Specify backend
+                    django.contrib.auth.login(request, user, backend="apps.users.backends.EmailOrUsernameBackend")
                     django.contrib.messages.success(request, _("Registration successful! Welcome."))
                     return redirect(redirect_url)
                 except Exception as e:
@@ -109,17 +106,24 @@ class AuthorizeView(View):
                         request, _("An unexpected error occurred during registration. Please try again.")
                     )
                     active_form = "register"
-                    # Pass the invalid form back to the template
                     register_form = form
             else:
+                # Add form errors to messages for debugging
+                for field, errors in form.errors.items():
+                    print(f"Registration Error - Field: {field}, Errors: {errors}")
+                    for error in errors:
+                        django.contrib.messages.error(
+                            request, f"{form.fields[field].label if field != '__all__' else ''}: {error}"
+                        )
+
+                # Keep the generic message as well
                 django.contrib.messages.error(request, _("Please correct the registration errors below."))
                 active_form = "register"
                 register_form = form
         else:
             django.contrib.messages.error(request, _("Invalid form submission type."))
-            active_form = "login"  # Default to login form on error
+            active_form = "login"
 
-        # Store active form in session to preserve state on page reload after error
         request.session["active_form"] = active_form
         context = {
             "login_form": login_form,
@@ -137,16 +141,18 @@ class ProfileView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # Use the user from the request directly
         user = self.request.user
         context["profile_user"] = user
 
-        # Define field groups based on the HTML structure
+        print(f"--- DEBUG (get_context_data): User email: '{user.email}', Type: {type(user.email)} ---")
+
         context["personal_fields"] = [
             {
                 "label": _("Username"),
                 "value": user.username,
                 "name": "username",
-                "editable": "username" in user.USER_EDITABLE_FIELDS,
+                "editable": False,
             },
             {
                 "label": _("First Name"),
@@ -159,12 +165,6 @@ class ProfileView(TemplateView):
                 "value": user.last_name,
                 "name": "last_name",
                 "editable": "last_name" in user.USER_EDITABLE_FIELDS,
-            },
-            {
-                "label": _("Birth Date"),
-                "value": user.birth_date,
-                "name": "birth_date",
-                "editable": "birth_date" in user.USER_EDITABLE_FIELDS,
             },
         ]
         context["contact_fields"] = [
@@ -209,78 +209,54 @@ class ProfileView(TemplateView):
             },
         ]
 
-        context["show_avatar"] = bool(user.avatar)
-        context["avatar_url"] = user.avatar.url if user.avatar else None
-
         return context
 
     def post(self, request, *args, **kwargs):
-        user = request.user
-        field_name = request.POST.get("field_name")
+        # Get the user instance from the request
+        user_instance = request.user
 
-        # Check if the field is actually editable by the user
-        if field_name not in user.USER_EDITABLE_FIELDS:
-            django.contrib.messages.error(request, _("This field cannot be edited."))
+        field_name = request.POST.get("field_name")
+        field_value = request.POST.get("field_value")
+
+        # --- Validation: Check if field is editable ---
+        if not field_name or field_name not in user_instance.USER_EDITABLE_FIELDS:
+            django.contrib.messages.error(request, _("This field cannot be edited or is invalid."))
             return redirect("users:profile")
 
-        # Prepare data and files for the form, focusing on the specific field
-        post_data = {field_name: request.POST.get("field_value")}
-        files_data = {}
-        if field_name == "avatar" and "field_value" in request.FILES:
-            files_data = {field_name: request.FILES["field_value"]}
-            # Clear the POST data for avatar if a file is uploaded
-            post_data[field_name] = None
+        # --- Form Handling ---
+        # Create a dictionary containing only the data for the field being updated
+        post_data = {field_name: field_value}
 
-        # Instantiate the form with only the relevant data for validation
-        # Pass the full request.POST and request.FILES to the form constructor
-        # The form's __init__ will filter based on USER_EDITABLE_FIELDS
-        form = self.form_class(request.POST, request.FILES, instance=user)
+        # Instantiate the form, passing the specific field being updated
+        # This helps the form's __init__ focus validation if needed
+        form = self.form_class(post_data, instance=user_instance, updating_field=field_name)
 
-        # Manually trigger cleaning for the specific field being updated
-        if field_name in form.fields:
+        # --- Form Validation ---
+        if form.is_valid():
             try:
-                # Use the form's logic to get the value for the specific field
-                value_for_clean = form.fields[field_name].widget.value_from_datadict(
-                    form.data, form.files, form.add_prefix(field_name)
+                # Use the form's save method, which should now correctly handle partial updates
+                form.save(commit=True)
+                django.contrib.messages.success(
+                    request,
+                    _("'{field}' updated successfully.").format(
+                        field=_(form.fields[field_name].label) if field_name in form.fields else field_name
+                    ),
                 )
-                # Clean the specific field's value
-                cleaned_value = form.fields[field_name].clean(value_for_clean)
-
-                # Run full clean to catch cross-field validation if needed (e.g., email uniqueness)
-                # We need to populate cleaned_data for full_clean to work correctly
-                form.cleaned_data = {field_name: cleaned_value}
-                form.full_clean()  # This might raise ValidationError for cross-field issues
-
-                # Check errors *after* full_clean
-                if field_name not in form.errors:
-                    # Save only the updated field
-                    setattr(user, field_name, cleaned_value)
-                    user.save(update_fields=[field_name])
-                    django.contrib.messages.success(
-                        request, _("'{field}' updated successfully.").format(field=_(form.fields[field_name].label))
-                    )
-                else:
-                    # Add specific field error message
-                    for error in form.errors[field_name]:
-                        django.contrib.messages.error(request, f"{_(form.fields[field_name].label)}: {error}")
-
-            except ValidationError as e:
-                # Add validation error message from clean() or full_clean()
-                # Check if it's a field-specific error or non-field error
-                if hasattr(e, "error_dict") and field_name in e.error_dict:
-                    for error in e.error_dict[field_name]:
-                        django.contrib.messages.error(request, f"{_(form.fields[field_name].label)}: {error.message}")
-                elif hasattr(e, "messages"):  # Handle non-field errors from full_clean
-                    for msg in e.messages:
-                        django.contrib.messages.error(request, msg)
-                else:  # Generic fallback
-                    django.contrib.messages.error(request, f"{_(form.fields[field_name].label)}: {e}")
-
             except Exception as e:
-                print(f"Error updating profile field '{field_name}': {e}")
-                django.contrib.messages.error(request, _("An error occurred while updating the profile."))
-
+                print(f"Error saving profile update for field '{field_name}', user {user_instance.username}: {e}")
+                django.contrib.messages.error(request, _("An error occurred while saving your profile."))
         else:
-            django.contrib.messages.error(request, _("Invalid field specified for update."))
+            # --- Handle Validation Errors ---
+            print(f"--- DEBUG (POST): Form invalid. Errors: {form.errors.as_json()} ---")  # Debug form errors
+            if field_name in form.errors:
+                label = form.fields[field_name].label if field_name in form.fields else field_name
+                label_text = _(label) if label else field_name
+                for error in form.errors[field_name]:
+                    django.contrib.messages.error(request, f"{label_text}: {error}")
+            elif "__all__" in form.errors:
+                for error in form.errors["__all__"]:
+                    django.contrib.messages.error(request, error)
+            else:
+                django.contrib.messages.error(request, _("An error occurred during validation."))
 
         return redirect("users:profile")

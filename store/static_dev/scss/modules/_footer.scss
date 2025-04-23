@@ -1,3 +1,4 @@
+// --"--\Catalog\store\static_dev\scss\modules\_footer.scss"--
 .footer {
   color: var(--text-color);
   box-shadow: 0 -4px 15px var(--box-shadow-color);
@@ -379,7 +380,7 @@
   opacity: 0.5;
 }
 
-.language-select {
+.language-switcher select {
   background-color: var(--input-bg);
   color: var(--text-color);
   border: 1px solid transparent;
@@ -390,19 +391,20 @@
   cursor: pointer;
   transition: all var(--transition-speed) ease;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: calc(100% - 12px) center;
   padding-right: 35px;
+  min-width: 100px;
 }
 
-.language-select:focus {
+.language-switcher select:focus {
   outline: none;
   box-shadow: 0 0 0 3px var(--input-focus);
   border-color: var(--accent-color);
 }
 
-.language-select:hover {
+.language-switcher select:hover {
   background-color: var(--accent-light);
   border-color: var(--accent-color);
 }

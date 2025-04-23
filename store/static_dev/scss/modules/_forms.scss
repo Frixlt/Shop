@@ -1,9 +1,4 @@
 // --"--\Catalog\store\static_dev\scss\modules\_forms.scss"--
-// --- Sass Variables (Imported or defined elsewhere) ---
-// Assuming $border-radius, $font-family-button, $transition-speed are available
-// Assuming CSS Variables like --error-color, --error-color-rgb, --accent-color, etc. are available
-
-// --- Animations ---
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -18,7 +13,6 @@
 
 @keyframes fadeInUp {
   from {
-    // Added explicit from state for animation start
     opacity: 0;
     transform: translateY(10px);
   }
@@ -47,22 +41,18 @@
   }
 }
 
-// --- End Animations ---
-
-
-// --- Auth Container and Tabs ---
 .auth-container {
   max-width: 450px;
-  margin: 2rem auto; // Added top/bottom margin back
-  background: var(--card-background); // Assuming --card-background exists
+  margin: 2rem auto;
+  background: var(--card-background);
   padding: 2rem 2.5rem;
   border-radius: $border-radius;
   border: 1px solid var(--border-color);
-  box-shadow: 0 4px 15px var(--box-shadow-color); // Assuming --box-shadow-color exists
+  box-shadow: 0 4px 15px var(--box-shadow-color);
   transition: box-shadow 0.4s ease;
 
   &:hover {
-    box-shadow: 0 8px 25px var(--box-shadow-hover-color); // Assuming hover color exists
+    box-shadow: 0 8px 25px var(--box-shadow-hover-color);
   }
 }
 
@@ -85,7 +75,7 @@
   border-bottom: 3px solid transparent;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: $font-family-button; // Use button font
+  font-family: $font-family-button;
 
   &:hover {
     color: var(--accent-color);
@@ -100,14 +90,14 @@
 
 .tab-indicator {
   position: absolute;
-  bottom: -1px; // Align with the bottom border visually
+  bottom: -1px;
   height: 3px;
   background-color: var(--accent-color);
   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
 }
 
 .auth-form {
-  display: none; // Hidden by default
+  display: none;
 
   &.active {
     display: block;
@@ -115,34 +105,29 @@
   }
 }
 
-// --- End Auth Container ---
-
-
-// --- Generic Form Error Styling (Placed at Top) ---
 .form-error-generic {
   background-color: rgba(var(--error-color-rgb), 0.08);
   color: var(--error-color);
   border: 1px solid rgba(var(--error-color-rgb), 0.4);
   border-left: 4px solid var(--error-color);
   padding: 0.8rem 1rem 0.8rem 2.5rem;
-  margin-bottom: 1.5rem; // Space below the error box before fields start
+  margin-bottom: 1.5rem;
   border-radius: $border-radius;
   font-size: 0.9rem;
   font-weight: 500;
   position: relative;
-  display: block; // Shown by default if rendered by Django
+  display: block;
   line-height: 1.5;
   text-align: left;
   transition: opacity 0.3s ease-in-out;
 
   &::before {
-    content: '\f071'; // Font Awesome Exclamation Triangle
-    font-family: 'Font Awesome 6 Free'; // Ensure correct font family name
+    content: '\f071';
+    font-family: 'Font Awesome 6 Free';
     font-weight: 900;
     position: absolute;
     left: 0.9rem;
-    top: 0.8rem; // Adjust vertical position if needed
-    // top: 50%; transform: translateY(-50%); // Alternative centering
+    top: 0.8rem;
     font-size: 1rem;
     color: var(--error-color);
   }
@@ -151,7 +136,6 @@
     animation: shake 0.4s linear;
   }
 
-  // Target potential spans or direct text inside
   span,
   p {
     margin: 0;
@@ -159,21 +143,17 @@
   }
 }
 
-
-// --- Form Fields (General Structure & Animation) ---
 .form-field {
-  margin-bottom: 1.2rem; // Default spacing between fields
-  position: relative; // For potential absolute positioning inside (like icons, though handled by wrapper now)
+  margin-bottom: 1.2rem;
+  position: relative;
   opacity: 0;
   transform: translateY(10px);
   animation: fadeInUp 0.4s forwards;
 
-  // --- Staggered Animation Delays ---
   &:nth-child(1) {
     animation-delay: 0.05s;
   }
 
-  // These might need adjusting based on actual field order after loop render
   &:nth-child(2) {
     animation-delay: 0.1s;
   }
@@ -198,46 +178,25 @@
     animation-delay: 0.35s;
   }
 
-  // Add more if needed
-
-  // --- Reduced Margin for Specific Field Types ---
-  // Target the container added by CheckboxInput widget
   &.checkbox-field {
     margin-bottom: 0.8rem;
-    // Add specific layout adjustments for the checkbox if needed
-    // e.g., to align with other fields if label is on top
   }
 
-  // Target containers with radio groups
   &:has(.radio-group) {
     margin-bottom: 0.8rem;
   }
-
-  // --- Add margin below field if Django error follows ---
-  // Select .form-field that is immediately followed by .django-field-error
-  // Note: This might not work reliably depending on exact HTML structure/whitespace.
-  // It's safer to control spacing via the error block's margin-top.
-  // & + .django-field-error {
-  //   margin-top: -0.7rem; // Pull error closer if needed
-  // }
 }
 
-
-// --- Field Labels (General Styling) ---
-// Target labels that are direct children of .form-field
-// Exclude labels specific to custom checkbox/radio implementations if they have unique classes
 .form-field>label:not(.checkbox-label):not(.radio-label):not(.radio-group-label) {
-  display: flex; // Use flex for alignment with indicators
-  align-items: center; // Center items vertically
-  margin-bottom: 0.5rem; // Space below label
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--text-color-secondary);
-  position: relative; // For optional underline effect
+  position: relative;
 
-  // Optional underline effect (excluding labels for custom selects)
   &:not([for^="custom_id_"])::after {
-    // Exclude labels targeting custom select widget IDs
     content: "";
     position: absolute;
     bottom: -3px;
@@ -249,20 +208,17 @@
   }
 }
 
-// Underline activation on focus-within the field's wrapper
-// Exclude specific widget types that don't need this effect
 .form-field:has(.input-wrapper:focus-within)>label:not(.checkbox-label):not(.radio-label):not(.radio-group-label):not([for^="custom_id_"]) {
   &::after {
     width: 100%;
   }
 }
 
-// --- Required/Optional Indicators ---
 .required-indicator {
   color: var(--error-color);
   margin-left: 4px;
   font-weight: bold;
-  display: inline; // Ensure it stays inline with label text
+  display: inline;
 }
 
 .optional-text {
@@ -273,60 +229,48 @@
   margin-left: 4px;
 }
 
-// --- Field Description/Help Text ---
 .form-field-description {
   font-size: 0.8rem;
   color: var(--text-color-secondary);
-  margin-top: 0.3rem; // Space above description
-  margin-bottom: 0; // Remove default bottom margin if any
+  margin-top: 0.3rem;
+  margin-bottom: 0;
 }
 
-
-// --- Field-Specific Error Message (Client-Side - JS Controlled) ---
-// Target errors within the main field container or specific widget containers
 .form-field>.form-error,
-// Standard fields
 .checkbox-field>.form-error,
-// Checkboxes
 .file-upload-container>.file-error-text,
-// File inputs (using its specific class)
-.django-custom-select-widget~.form-error // Select input (error div is AFTER widget)
-
-  {
+.django-custom-select-widget~.form-error {
   color: var(--error-color);
   font-size: 0.85rem;
-  font-weight: 500; // Added for consistency
-  margin-top: 0.3rem; // Space above the error message
-  display: none; // Hidden by default (JS shows it)
-  min-height: 1.2em; // Reserve space to prevent layout shifts
+  font-weight: 500;
+  margin-top: 0.3rem;
+  display: none;
+  min-height: 1.2em;
   width: 100%;
-  text-align: left; // Align error text left
+  text-align: left;
 
   &.shake {
-    // Apply shake animation when error appears
     animation: shake 0.4s linear;
   }
 }
 
-// --- Django Field Error Styling (Server-Side) ---
-// Targets the wrapper div around Django's ul.errorlist
 .django-field-error {
-  margin-top: 0.3rem; // Space above the error block (Consistent with JS error)
-  padding: 0; // No padding needed on the wrapper itself
-  width: 100%; // Ensure it takes full width
+  margin-top: 0.3rem;
+  padding: 0;
+  width: 100%;
 
   .errorlist {
-    list-style: none; // Remove bullet points
+    list-style: none;
     padding: 0;
     margin: 0;
-    color: var(--error-color); // Use error color variable
-    font-size: 0.85rem; // Match JS error font size
-    font-weight: 500; // Match JS error font weight
-    text-align: left; // Ensure left alignment
+    color: var(--error-color);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: left;
 
     li {
-      margin-bottom: 0.25rem; // Space between multiple errors for the same field
-      line-height: 1.4; // Improve readability
+      margin-bottom: 0.25rem;
+      line-height: 1.4;
 
       &:last-child {
         margin-bottom: 0;
@@ -335,75 +279,49 @@
   }
 }
 
-// --- End Django Field Error Styling ---
-
-// --- Widget styles are imported separately ---
-// Example:
-// @import 'widgets/text_input';
-// @import 'widgets/select_input';
-// @import 'widgets/checkbox_input';
-// @import 'widgets/radio_input'; // If you create a separate radio widget style
-// @import 'widgets/file_input';
-// @import 'widgets/textarea_input';
-
-
-// --- Other Form Elements ---
-
-// Login Form Specific: "Remember Me" and "Forgot Password?" link container
 .form-options {
   display: flex;
-  justify-content: space-between; // Pushes items to ends
-  align-items: center; // Vertically align items
-  margin-bottom: 1.5rem; // Space below this section
-  font-size: 0.9rem; // Base font size for this section
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
 
-  // Styles for the checkbox part within form-options
-  // This targets the div rendered by the CheckboxInput template
   .checkbox-field {
-    margin-bottom: 0; // Remove bottom margin when inside form-options
+    margin-bottom: 0;
   }
 }
 
-// Container specifically for the "Remember me" checkbox if needed outside loop
-// .form-check { // Use .checkbox-field styling now
-//   display: flex;
-//   align-items: center;
-// }
-
-// General Link Styling within Forms
 .auth-link {
-  color: var(--primary-color); // Use primary color for links
+  color: var(--primary-color);
   text-decoration: none;
   transition: color $transition-speed ease;
 
   &:hover {
-    color: var(--accent-color); // Use accent color on hover
+    color: var(--accent-color);
     text-decoration: underline;
   }
 }
 
-// Auth Button (Submit)
 .auth-button {
   width: 100%;
   padding: 0.9rem 1.5rem;
   background: var(--accent-color);
-  color: #ffffff; // Explicit white color
+  color: #ffffff;
   border: none;
-  border-radius: 6px; // Slightly smaller radius
+  border-radius: 6px;
   font-size: 1rem;
   font-weight: 600;
-  font-family: $font-family-button; // Use button font
+  font-family: $font-family-button;
   cursor: pointer;
   transition: all $transition-speed ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  margin-top: 1rem; // Space above the button
+  margin-top: 1rem;
   position: relative;
-  overflow: hidden; // For ripple effect
+  overflow: hidden;
 
-  // Ripple Effect
   &::before {
     content: '';
     position: absolute;
@@ -419,30 +337,26 @@
   }
 
   &:active::before {
-    width: 300px; // Expand size on click
+    width: 300px;
     height: 300px;
   }
 
   &:hover:not(:disabled) {
-    background: var(--accent-hover); // Use hover color variable
-    transform: translateY(-2px); // Slight lift effect
-    box-shadow: 0 4px 10px rgba(var(--accent-color-rgb), 0.3); // Use accent RGB for shadow
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(var(--accent-color-rgb), 0.3);
   }
 
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
-    transform: none; // No lift when disabled
+    transform: none;
     box-shadow: none;
   }
 
-  i {
-    // Style icons inside button if needed
-    // Example: margin-right: 0.3rem;
-  }
+  i {}
 }
 
-// Text for switching between Login/Register forms
 .auth-switch-text {
   text-align: center;
   margin-top: 1.5rem;
@@ -450,56 +364,49 @@
   color: var(--text-color-secondary);
 }
 
-
-// --- RADIO BUTTON STYLES (If using standard radio, not custom widget) ---
 .radio-group {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem; // Space between radio options
+  gap: 0.3rem;
 }
 
 .radio-group-label {
-  display: block; // Separate line
-  margin-bottom: 0.5rem; // Space before first option
+  display: block;
+  margin-bottom: 0.5rem;
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--text-color-secondary);
 }
 
 .radio-field {
-  // Container for one radio input + label
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.2rem; // Small space between radio fields
+  margin-bottom: 0.2rem;
 }
 
 .radio-input {
-  // The actual radio input
   margin: 0;
   cursor: pointer;
-  accent-color: var(--accent-color); // Color when checked
+  accent-color: var(--accent-color);
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
 }
 
 .radio-label {
-  // Label next to the radio input
   font-size: 0.9rem;
   color: var(--text-color-secondary);
   cursor: pointer;
   user-select: none;
-  line-height: normal; // Better alignment
-  margin-bottom: 0; // Override default label margin
+  line-height: normal;
+  margin-bottom: 0;
 }
 
-// Button-like Radio Inputs (If using this style)
 .radio-button-group {
   margin-bottom: 1.5rem;
 }
 
-// .radio-group-label {} // Use same style as above
 .radio-buttons {
   display: flex;
   flex-wrap: wrap;
@@ -521,68 +428,53 @@
   width: 0;
 }
 
-// Hide native input
-.radio-btn {
-  /* ... styles for the button look ... */
-}
+.radio-btn {}
 
-.radio-btn:hover {
-  /* ... */
-}
+.radio-btn:hover {}
 
-.radio-input:checked+.radio-btn {
-  /* ... */
-}
+.radio-input:checked+.radio-btn {}
 
-.radio-input:focus+.radio-btn {
-  /* ... */
-}
+.radio-input:focus+.radio-btn {}
 
-// --- END RADIO STYLES ---
-
-
-// --- Form Success Message Styling ---
 .form-success {
   background-color: rgba(var(--accent-color-rgb), 0.08);
   color: var(--accent-color);
   border: 1px solid rgba(var(--accent-color-rgb), 0.4);
   border-left: 4px solid var(--accent-color);
   padding: 0.8rem 1rem 0.8rem 2.5rem;
-  margin-top: 1.5rem; // Or margin-bottom if placed differently
+  margin-top: 1.5rem;
   border-radius: $border-radius;
   font-size: 0.9rem;
   font-weight: 500;
   position: relative;
-  display: none; // Hidden by default
+  display: none;
   line-height: 1.5;
   text-align: left;
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
 
   &::before {
-    content: '\f058'; // Font Awesome Check Circle (solid)
+    content: '\f058';
     font-family: 'Font Awesome 6 Free';
     font-weight: 900;
     position: absolute;
     left: 0.9rem;
-    top: 0.8rem; // Adjust as needed
+    top: 0.8rem;
     font-size: 1rem;
     color: var(--accent-color);
   }
 
   &.active {
-    display: block; // Shown by JS
+    display: block;
     opacity: 1;
   }
 }
 
-
-// --- Responsiveness ---
 @media screen and (max-width: 768px) {
   .auth-container {
     max-width: 100%;
     padding: 1.5rem;
-    margin: 1rem; // Reduce margin on smaller screens
+    margin: 1rem;
   }
 
   .auth-button {
@@ -591,37 +483,34 @@
 
   .form-options {
     flex-direction: column;
-    align-items: flex-start; // Align items left
-    gap: 1rem; // Space between checkbox and link
+    align-items: flex-start;
+    gap: 1rem;
   }
 }
 
 @media screen and (max-width: 480px) {
   .auth-container {
-    padding: 1.5rem 1rem; // Adjust padding
+    padding: 1.5rem 1rem;
   }
 
-  .auth-tabs {
-    // Keep horizontal on mobile unless design requires stacking
-  }
+  .auth-tabs {}
 
   .tab-indicator {
-    display: none; // Hide indicator on smallest screens where tabs might wrap badly
+    display: none;
   }
 
   .auth-tab.active {
-    border-bottom-width: 2px; // Make active border slightly thinner
+    border-bottom-width: 2px;
   }
 
   .form-field {
-    margin-bottom: 1rem; // Slightly reduce field spacing
+    margin-bottom: 1rem;
   }
 
   .auth-button {
-    font-size: 0.9rem; // Slightly smaller button text
+    font-size: 0.9rem;
   }
 
-  // Responsive radio buttons (if using button style)
   .radio-buttons {
     flex-direction: column;
     width: 100%;
@@ -637,7 +526,6 @@
   }
 }
 
-// --- Z-index fix for custom select dropdown ---
 .form-field:has(.select--open) {
-  z-index: 20; // Ensure dropdown appears above subsequent fields
+  z-index: 20;
 }

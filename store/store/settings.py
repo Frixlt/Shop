@@ -1,3 +1,4 @@
+# --"--\Catalog\store\store\settings.py"--
 import pathlib
 import decouple
 from django.utils.translation import gettext_lazy as _
@@ -29,11 +30,9 @@ ALLOWED_HOSTS = decouple.config(
 )
 
 INSTALLED_APPS = [
-    # Custom applications
     "apps.catalog.apps.CatalogConfig",
     "apps.core.apps.CoreConfig",
     "apps.users.apps.UsersConfig",
-    # Native Django applications # noqa: CM001
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -41,7 +40,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.forms",
-    # External applications
     "compressor",
     "sorl.thumbnail",
 ]
@@ -49,12 +47,12 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django.middleware.locale.LocaleMiddleware",
 ]
 
 
@@ -82,8 +80,6 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
-                # Custom applications
-                # Native Django applications # noqa: CM001
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
@@ -162,7 +158,7 @@ MEDIA_ROOT = BASE_DIR / "media/"
 MEDIA_URL = "media/"
 
 
-LOGIN_URL = "users.views.AuthorizeView"
+LOGIN_URL = "users:authorize"
 
 LOGOUT_REDIRECT_URL = "/"
 
@@ -176,16 +172,15 @@ EMAIL_FILE_PATH = BASE_DIR / "send_mail"
 
 SPAM_EMAIL = decouple.config("DJANGO_MAIL", default="your_email@ya.ru")
 
-# {VIP} # noqa: E800
 COMPRESS_JS_FILTERS = [
     "compressor.filters.jsmin.JSMinFilter",
 ]
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
-    "django.contrib.staticfiles.finders.AppDirectoriesFinder",  # Было AppStorageFinder
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
     "compressor.finders.CompressorFinder",
 ]
 COMPRESS_PRECOMPILERS = (("text/x-scss", "django_libsass.SassCompiler"),)
 
-COMPRESS_ENABLED = False  # Для продакшна лучше True
-COMPRESS_OFFLINE = False  # Для разработки можно False
+COMPRESS_ENABLED = False
+COMPRESS_OFFLINE = False
