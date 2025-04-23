@@ -1,4 +1,5 @@
-from django.contrib.auth import get_user_model
+# --"--\Catalog\store\apps\users\forms.py"--
+import django.contrib.auth
 from django.core.exceptions import ValidationError
 import django.forms
 from django.utils.safestring import mark_safe
@@ -7,10 +8,10 @@ from django.utils.translation import gettext_lazy as _
 from apps.core.forms import BaseForm
 import apps.core.widgets
 
-__all__ = ("LoginForm", "RegisterForm")
+__all__ = ("LoginForm", "RegisterForm", "ProfileUpdateForm")
 
 
-UserModel = get_user_model()
+UserModel = django.contrib.auth.get_user_model()
 
 
 class LoginForm(BaseForm):
@@ -177,9 +178,130 @@ class RegisterForm(BaseForm):
         return email
 
     def save(self, commit=True):
-        user = UserModel(**self.cleaned_data)
+        # Exclude fields not in the UserModel before creating the instance
+        user_data = {
+            field: self.cleaned_data[field]
+            for field in self.cleaned_data
+            if field in [f.name for f in UserModel._meta.get_fields()] and field != "confirm_password"
+        }
+        user = UserModel(**user_data)
         user.set_password(self.cleaned_data["password"])
         if commit:
             user.save()
 
         return user
+
+
+class ProfileUpdateForm(BaseForm):
+    """
+    Form for updating user profile fields.
+    Fields are dynamically included based on UserModel.USER_EDITABLE_FIELDS.
+    """
+
+    # Define potential fields with widgets, even if not always shown
+    first_name = django.forms.CharField(
+        label=_("First Name"),
+        required=False,
+        widget=apps.core.widgets.TextInput(
+            attrs={"placeholder": _("Your first name"), "id": "id_profile_first_name"},
+            icon_class="fa-user",
+        ),
+    )
+    last_name = django.forms.CharField(
+        label=_("Last Name"),
+        required=False,
+        widget=apps.core.widgets.TextInput(
+            attrs={"placeholder": _("Your last name"), "id": "id_profile_last_name"},
+            icon_class="fa-user",
+        ),
+    )
+    email = django.forms.EmailField(
+        label=_("Email"),
+        required=False,  # Email change might need verification, handle in view
+        widget=apps.core.widgets.TextInput(
+            attrs={
+                "placeholder": "your@email.com",
+                "data-email-message": _("Please enter a valid email address."),
+                "id": "id_profile_email",
+            },
+            icon_class="fa-envelope",
+        ),
+        error_messages={"invalid": _("Please enter a valid email address.")},
+    )
+    birth_date = django.forms.DateField(
+        label=_("Birth Date"),
+        required=False,
+        widget=django.forms.DateInput(
+            attrs={"type": "date", "id": "id_profile_birth_date"}  # Use standard date input for simplicity
+        ),
+    )
+    phone_number = django.forms.CharField(
+        label=_("Phone Number"),
+        required=False,
+        widget=apps.core.widgets.TextInput(
+            attrs={"placeholder": "+79XXXXXXXXX", "id": "id_profile_phone_number"},
+            icon_class="fa-phone",
+        ),
+    )
+    city = django.forms.CharField(
+        label=_("City"),
+        required=False,
+        widget=apps.core.widgets.TextInput(
+            attrs={"placeholder": _("Your city"), "id": "id_profile_city"},
+            icon_class="fa-city",
+        ),
+    )
+    avatar = django.forms.ImageField(
+        label=_("Avatar"),
+        required=False,
+        widget=apps.core.widgets.FileInput(
+            config={
+                "max_file_count": 1,
+                "max_file_size": 2 * 1024 * 1024,  # 2MB limit example
+                "accepted_formats": "image/*",
+            },
+            attrs={"id": "id_profile_avatar"},
+        ),
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("instance", None)  # Get user instance
+        super().__init__(*args, **kwargs)
+
+        if not self.user:
+            raise ValueError("ProfileUpdateForm requires an 'instance' argument (the user).")
+
+        # Dynamically remove fields not listed as editable
+        editable_fields = getattr(self.user, "USER_EDITABLE_FIELDS", [])
+        fields_to_remove = [name for name in self.fields if name not in editable_fields]
+        for field_name in fields_to_remove:
+            del self.fields[field_name]
+
+        # Set initial values from the user instance
+        for field_name in self.fields:
+            self.fields[field_name].initial = getattr(self.user, field_name, None)
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        # Check uniqueness only if the email has changed
+        if email and self.user and email.lower() != self.user.email.lower():
+            if UserModel.objects.filter(email__iexact=email).exclude(pk=self.user.pk).exists():
+                raise ValidationError(
+                    _("This email address is already registered by another user."), code="unique_email"
+                )
+        return email
+
+    def save(self, commit=True):
+        if not self.user:
+            raise ValueError("Cannot save form without a user instance.")
+
+        # Update user instance with cleaned data
+        for field_name, value in self.cleaned_data.items():
+            # Handle avatar separately to avoid clearing if no new file is uploaded
+            if field_name == "avatar" and not value:
+                continue  # Keep existing avatar if no new one provided
+            setattr(self.user, field_name, value)
+
+        if commit:
+            self.user.save()
+        return self.user

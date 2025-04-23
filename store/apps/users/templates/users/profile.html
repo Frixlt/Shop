@@ -1,0 +1,193 @@
+{# --"--\Catalog\store\apps\users\templates\users\profile.html"-- #}
+{% extends 'base.html' %}
+{% load i18n static compress %}
+{% block title %}
+  {% trans "User Profile" %}
+{% endblock title %}
+{% block css %}
+  {% compress css %}
+    <link rel="stylesheet"
+          href="{% static 'scss/pages/profile.scss' %}"
+          type="text/x-scss">
+  {% endcompress %}
+  {# Font Awesome is already included in base.html #}
+{% endblock css %}
+{% block content %}
+  <div class="container">
+    {# Theme switcher can remain if desired, or be removed #}
+    {# <div class="theme-switcher-container"> ... </div> #}
+    <div class="profile-container"
+         data-show-avatar="{{ show_avatar|yesno:'true,false' }}">
+      <h1 class="profile-title">{% trans "User Profile" %}</h1>
+      {% if show_avatar %}
+        <div class="profile-avatar-section">
+          <div class="avatar-container" id="avatar-container">
+            <div class="avatar-overlay">
+              <div>
+                <i class="fas fa-camera"></i>
+                <p>{% trans "Change profile picture" %}</p>
+              </div>
+            </div>
+            {% if avatar_url %}
+              <img src="{{ avatar_url }}"
+                   alt="{% trans 'Profile picture' %}"
+                   class="avatar-image"
+                   id="avatar-image">
+            {% else %}
+              <div class="avatar-placeholder">
+                <i class="fas fa-user"></i>
+              </div>
+            {% endif %}
+          </div>
+          <a href="#" class="profile-button secondary" id="change-avatar-btn">
+            <i class="fas fa-edit"></i> {% trans "Change Photo" %}
+          </a>
+        </div>
+      {% endif %}
+      <div class="profile-info-section">
+        <h2 class="profile-section-title">{% trans "Personal Information" %}</h2>
+        <div class="profile-field-group" id="personal-fields">
+          {% for field in personal_fields %}
+            <div class="profile-field {% if field.editable %}editable{% endif %}"
+                 data-field-name="{{ field.name }}">
+              <span class="field-label">
+                <i class="fas fa-{% if field.name == 'username' %}user{% elif field.name == 'first_name' %}user{% elif field.name == 'last_name' %}user{% elif field.name == 'birth_date' %}birthday-cake{% elif field.name == 'gender' %}venus-mars{% else %}question{% endif %}"></i>
+                {{ field.label }}
+              </span>
+              <div class="field-value">{{ field.value|default:"-" }}</div>
+              {% if field.editable %}<span class="edit-icon"><i class="fas fa-pencil-alt"></i></span>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+        <h2 class="profile-section-title">{% trans "Contact Information" %}</h2>
+        <div class="profile-field-group" id="contact-fields">
+          {% for field in contact_fields %}
+            <div class="profile-field {% if field.editable %}editable{% endif %}"
+                 data-field-name="{{ field.name }}">
+              <span class="field-label">
+                <i class="fas fa-{% if field.name == 'email' %}envelope{% elif field.name == 'phone_number' %}phone{% elif field.name == 'city' %}city{% else %}question{% endif %}"></i>
+                {{ field.label }}
+              </span>
+              <div class="field-value">{{ field.value|default:"-" }}</div>
+              {% if field.editable %}<span class="edit-icon"><i class="fas fa-pencil-alt"></i></span>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+        <h2 class="profile-section-title">{% trans "Additional Information" %}</h2>
+        <div class="profile-field-group" id="additional-fields">
+          {% for field in additional_fields %}
+            <div class="profile-field {% if field.editable %}editable{% endif %}"
+                 data-field-name="{{ field.name }}">
+              <span class="field-label">
+                <i class="fas fa-{% if field.name == 'date_joined' %}calendar-alt{% elif field.name == 'is_active' %}info-circle{% elif field.name == 'last_login' %}clock{% elif field.name == 'is_staff' %}user-shield{% else %}question{% endif %}"></i>
+                {{ field.label }}
+              </span>
+              <div class="field-value">{{ field.value|default:"-" }}</div>
+              {% if field.editable %}<span class="edit-icon"><i class="fas fa-pencil-alt"></i></span>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="profile-actions">
+        {# Removed Edit Profile Button #}
+        {# Link to Django's password change view #}
+        <a href="#" class="profile-button secondary"><i class="fas fa-key"></i> {% trans "Change Password" %}</a>
+        {# Logout button (already handled in header, but can be duplicated here) #}
+        <form action="{% url 'users:logout' %}"
+              method="post"
+              style="display: inline">
+          {% csrf_token %}
+          <button type="submit" class="profile-button danger">
+            <i class="fas fa-sign-out-alt"></i> {% trans "Logout" %}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Field Edit Modal -->
+  <div class="modal-overlay" id="field-edit-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="edit-modal-title">{% trans "Edit Field" %}</h3>
+        <button class="modal-close" data-modal-close aria-label="{% trans 'Close' %}">×</button>
+      </div>
+      <div class="modal-body">
+        {# Form now submits directly to the profile view #}
+        <form id="field-edit-form" method="post" action="{% url 'users:profile' %}">
+          {% csrf_token %}
+          <input type="hidden" name="field_name" id="field-edit-name">
+          <div class="form-group">
+            <label for="field-edit-value" class="form-label" id="field-edit-label">{% trans "Value" %}:</label>
+            {# Input type might need to change based on field #}
+            <input type="text"
+                   id="field-edit-value"
+                   name="field_value"
+                   class="form-control">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="profile-button secondary" data-modal-close>{% trans "Cancel" %}</button>
+        {# Button now triggers form submission #}
+        <button type="submit"
+                class="profile-button"
+                id="field-edit-save"
+                form="field-edit-form">{% trans "Save" %}</button>
+      </div>
+    </div>
+  </div>
+  {% if show_avatar %}
+    <!-- Avatar Edit Modal -->
+    <div class="modal-overlay" id="avatar-edit-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">{% trans "Choose Profile Picture" %}</h3>
+          <button class="modal-close" data-modal-close aria-label="{% trans 'Close' %}">×</button>
+        </div>
+        <div class="modal-body">
+          {# Form now submits directly to the profile view #}
+          <form id="avatar-edit-form"
+                method="post"
+                action="{% url 'users:profile' %}"
+                enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="field_name" value="avatar">
+            {# Indicate which field is being updated #}
+            <p>{% trans "Select a new image:" %}</p>
+            {# Predefined avatar options can be added here if needed #}
+            {# <div class="avatar-selection-grid" id="avatar-options"></div> #}
+            <div class="form-group" style="margin-top: 1.5rem;">
+              <label for="avatar-upload" class="form-label">{% trans "Or upload your own:" %}</label>
+              <input type="file"
+                     id="avatar-upload"
+                     name="field_value"
+                     class="form-control"
+                     accept="image/*"
+                     style="display: none">
+              <button type="button" class="profile-button" id="upload-button">{% trans "Choose File" %}</button>
+              <img id="avatar-upload-preview"
+                   src="#"
+                   alt="{% trans 'Preview' %}"
+                   style="max-width: 100px;
+                          max-height: 100px;
+                          margin-top: 10px;
+                          border-radius: 50%;
+                          display: none" />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="profile-button secondary" data-modal-close>{% trans "Cancel" %}</button>
+          {# Button now triggers form submission #}
+          <button type="submit"
+                  class="profile-button"
+                  id="avatar-edit-save"
+                  form="avatar-edit-form">{% trans "Save" %}</button>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock content %}
+{% block extra_js %}
+  <script type="module" src="{% static 'js/pages/profile.js' %}"></script>
+{% endblock extra_js %}

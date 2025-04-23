@@ -1,0 +1,625 @@
+// --"--\Catalog\store\static_dev\scss\profile.scss"--
+
+// Import variables and base styles if needed, or define locally
+// Assuming variables like --body-bg, --card-bg, --border-color, etc. are available from main CSS or _variables.scss
+@import '../variables'; // Make sure variables are accessible
+@import '../modules/styles'; // Import base grid/container if needed, or style directly
+@import '../modules/fonts'; // Import fonts
+@import '../modules/header';
+@import '../modules/footer';
+
+// --- Base Profile Styles ---
+body.profile-page {
+  // Add a class to body in template if needed for specificity
+  // Specific body styles for profile page if different from default
+}
+
+.container {
+  // Assuming standard container from _styles.scss
+  max-width: 1000px;
+  margin: 2rem auto; // Add some margin
+  padding: 0 15px;
+}
+
+// --- Theme Switcher (Copy from example if used) ---
+.theme-switcher-container {
+  text-align: right;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.theme-switcher-container label {
+  margin-right: 0.5rem;
+  font-size: 0.95rem;
+  color: var(--text-color-secondary);
+}
+
+.theme-switcher-container select {
+  padding: 0.5rem 1rem;
+  border-radius: $border-radius; // Use Sass variable
+  border: 1px solid var(--switcher-border, var(--border-color)); // Fallback to border-color
+  background-color: var(--switcher-bg, var(--input-bg)); // Fallback to input-bg
+  color: var(--text-color);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+}
+
+.theme-switcher-container select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-light);
+  border-color: var(--accent-color);
+}
+
+// --- Profile Container ---
+.profile-container {
+  display: grid;
+  grid-template-columns: var(--grid-columns, 1fr); // Controlled by data-show-avatar
+  grid-gap: 2rem;
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: $border-radius; // Use Sass variable
+  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 25px var(--box-shadow-color);
+  margin: 0 auto;
+  max-width: 900px;
+  transition: all var(--transition-speed);
+}
+
+// Dynamic grid layout based on avatar visibility
+.profile-container[data-show-avatar="true"] {
+  --grid-columns: 1fr 2fr; // Avatar + Info
+}
+
+.profile-container[data-show-avatar="false"] {
+  --grid-columns: 1fr; // Info only
+}
+
+.profile-container[data-show-avatar="false"] .profile-avatar-section {
+  display: none; // Hide avatar section if data attribute is false
+}
+
+.profile-title {
+  grid-column: 1 / -1; // Span all columns
+  font-family: $font-family-heading; // Use Sass variable
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+  text-align: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+  transition: all var(--transition-speed);
+}
+
+// --- Avatar Section ---
+.profile-avatar-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+}
+
+.avatar-container {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  transition: all var(--transition-speed);
+  cursor: pointer;
+  overflow: hidden;
+  background-color: var(--placeholder-bg, var(--input-bg)); // Fallback
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid var(--avatar-border, var(--card-bg)); // Fallback
+  box-shadow: 0 5px 15px var(--avatar-shadow, var(--box-shadow-color)); // Fallback
+}
+
+.avatar-placeholder {
+  font-size: 4rem;
+  color: var(--placeholder-color, var(--text-color-secondary)); // Fallback
+  z-index: 1;
+}
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--highlight-color, rgba(25, 135, 84, 0.7)); // Fallback
+  opacity: 0;
+  display: flex;
+  flex-direction: column; // Stack icon and text
+  align-items: center;
+  justify-content: center;
+  transition: opacity var(--transition-speed);
+  color: white;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 1rem;
+  z-index: 2; // Above image/placeholder
+}
+
+.avatar-overlay i {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+// Hover effect for overlay (desktop only)
+@media (hover: hover) and (pointer: fine) {
+  .avatar-container:hover .avatar-overlay {
+    opacity: 1;
+  }
+
+  .avatar-container:hover .avatar-image {
+    filter: brightness(0.8); // Dim image on hover
+  }
+
+  // Hide the separate button on hover-capable devices
+  .profile-avatar-section .profile-button#change-avatar-btn {
+    display: none;
+  }
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  transition: filter var(--transition-speed); // Transition filter effect
+  position: relative;
+  z-index: 1; // Below overlay
+}
+
+// Show separate button on touch devices / smaller screens
+@media (max-width: 768px) {
+  .profile-avatar-section .profile-button#change-avatar-btn {
+    display: inline-flex; // Show the button
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  // Disable hover effect on avatar container itself for touch
+  .avatar-container:hover .avatar-overlay {
+    opacity: 0;
+  }
+
+  .avatar-container:hover .avatar-image {
+    filter: none;
+  }
+}
+
+.profile-avatar-section .profile-button i {
+  margin-right: 0.5rem;
+}
+
+// --- Info Section ---
+.profile-info-section {
+  padding: 1rem 0;
+}
+
+.profile-section-title {
+  font-family: $font-family-heading; // Use Sass variable
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed var(--border-color);
+  transition: all var(--transition-speed);
+}
+
+.profile-field-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  background-color: var(--section-bg, var(--body-bg)); // Fallback
+  padding: 1rem;
+  border-radius: $border-radius; // Use Sass variable
+}
+
+.profile-field {
+  padding: 0.75rem;
+  background-color: var(--card-bg);
+  border-radius: $border-radius; // Use Sass variable
+  transition: all var(--transition-speed);
+  position: relative; // For edit icon positioning
+}
+
+.profile-field.editable:hover {
+  background-color: var(--accent-light);
+  cursor: pointer;
+}
+
+.field-label {
+  display: block;
+  color: var(--text-color-secondary);
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all var(--transition-speed);
+}
+
+.field-label i {
+  margin-right: 0.5rem;
+  color: var(--text-color-secondary);
+  width: 1em; // Ensure consistent spacing
+  text-align: center;
+}
+
+.field-value {
+  font-size: 1rem;
+  font-weight: 400;
+  word-break: break-word;
+  transition: all var(--transition-speed);
+  color: var(--text-color); // Ensure text color is set
+}
+
+.edit-icon {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  opacity: 0;
+  color: var(--edit-icon-color, var(--accent-color)); // Fallback
+  cursor: pointer;
+  transition: all var(--transition-speed);
+  background-color: rgba(var(--card-bg-rgb, 255, 255, 255), 0.8); // Use RGB variable
+  backdrop-filter: blur(2px);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  pointer-events: none; // Initially not clickable
+}
+
+// Define RGB variables for card background
+:root {
+  --card-bg-rgb: 255, 255, 255;
+}
+
+[data-theme='dark'] {
+  --card-bg-rgb: 30, 30, 30;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --card-bg-rgb: 30, 30, 30;
+  }
+}
+
+// Show edit icon on hover (desktop)
+@media (hover: hover) and (pointer: fine) {
+  .profile-field.editable:hover .edit-icon {
+    opacity: 1;
+    pointer-events: auto; // Make clickable on hover
+  }
+}
+
+.edit-icon:hover {
+  transform: scale(1.2);
+  color: var(--accent-color);
+}
+
+// Always show edit icon on smaller screens/touch devices
+@media (max-width: 768px) {
+  .profile-field.editable .edit-icon {
+    opacity: 1;
+    pointer-events: auto; // Make clickable
+  }
+}
+
+// --- Profile Actions ---
+.profile-actions {
+  grid-column: 1 / -1; // Span all columns
+  text-align: center;
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.profile-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  background: var(--accent-color);
+  color: #ffffff;
+  border: none;
+  border-radius: $border-radius; // Use Sass variable
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-family: $font-family-button; // Use Sass variable
+  cursor: pointer;
+  transition: all var(--transition-speed);
+  text-decoration: none;
+  text-align: center;
+  line-height: 1.5; // Ensure consistent height
+}
+
+.profile-button i {
+  margin-right: 0.5rem;
+}
+
+.profile-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(25, 135, 84, 0.3);
+}
+
+.profile-button.secondary {
+  background: var(--input-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.profile-button.secondary:hover:not(:disabled) {
+  background: var(--accent-light);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  box-shadow: none; // Remove shadow for secondary
+  transform: translateY(-2px);
+}
+
+.profile-button.danger {
+  background: var(--error-color);
+  color: #ffffff;
+}
+
+.profile-button.danger:hover:not(:disabled) {
+  background: #d63e62; // Darker red on hover
+  box-shadow: 0 4px 10px rgba(239, 71, 111, 0.3);
+  transform: translateY(-2px);
+}
+
+.profile-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+
+// --- Modal Styles ---
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--modal-overlay, rgba(0, 0, 0, 0.5)); // Fallback
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-speed), visibility 0s var(--transition-speed);
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--transition-speed);
+}
+
+.modal-content {
+  background-color: var(--card-bg);
+  padding: 2rem;
+  border-radius: $border-radius; // Use Sass variable
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh; // Changed from 80vh
+  overflow-y: auto;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  transform: translateY(-20px) scale(0.95);
+  transition: all var(--transition-speed) ease-out;
+}
+
+.modal-overlay.active .modal-content {
+  transform: translateY(0) scale(1);
+}
+
+@media screen and (max-width: 480px) {
+  .modal-content {
+    width: 100%;
+    height: 100%; // Full screen on small devices
+    max-height: 100vh;
+    border-radius: 0;
+    padding: 1.5rem 1rem; // Adjust padding
+  }
+}
+
+.modal-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  font-family: $font-family-heading; // Use Sass variable
+  font-size: 1.5rem;
+  color: var(--text-color);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-color-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+  line-height: 1;
+  padding: 0.2rem;
+}
+
+.modal-close:hover {
+  color: var(--error-color);
+  transform: scale(1.1);
+}
+
+.modal-body {
+  margin-bottom: 1.5rem;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+// --- Form Styles (Inside Modal) ---
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: $border-radius; // Use Sass variable
+  border: 1px solid var(--border-color);
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  font-family: var(--font-family-base);
+  font-size: 1rem;
+  transition: all var(--transition-speed);
+  line-height: 1.5; // Ensure consistent height
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+// --- Avatar Selection Grid (Inside Modal) ---
+.avatar-selection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.avatar-option {
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: all var(--transition-speed);
+  position: relative;
+  aspect-ratio: 1 / 1; // Maintain square aspect ratio
+}
+
+.avatar-option img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatar-option.selected {
+  border-color: var(--accent-color);
+  transform: scale(1.05);
+  box-shadow: 0 0 10px var(--accent-light);
+}
+
+// Checkmark for selected avatar option
+.avatar-option.selected::after {
+  content: '\f00c'; // Font Awesome check
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  color: white;
+  background-color: var(--accent-color);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+// --- Responsive Adjustments ---
+@media screen and (max-width: 768px) {
+  .profile-container {
+    grid-template-columns: 1fr; // Force single column
+    padding: 1.5rem;
+  }
+
+  .profile-container[data-show-avatar="true"] {
+    grid-template-columns: 1fr; // Ensure single column even with avatar
+  }
+
+  .profile-field-group {
+    grid-template-columns: 1fr; // Single column for fields
+  }
+
+  .profile-section-title {
+    text-align: center; // Center section titles
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .profile-container h1 {
+    font-size: 1.5rem;
+  }
+
+  .theme-switcher-container {
+    justify-content: center; // Center theme switcher
+  }
+
+  .profile-actions {
+    flex-direction: column; // Stack action buttons
+    align-items: stretch; // Make buttons full width
+  }
+
+  .avatar-container {
+    width: 150px;
+    height: 150px;
+  }
+
+  .avatar-selection-grid {
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .avatar-option.selected::after {
+    width: 16px;
+    height: 16px;
+    font-size: 8px;
+    bottom: 3px;
+    right: 3px;
+  }
+}

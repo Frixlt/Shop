@@ -41,7 +41,7 @@
           {# Profile/Login Button #}
           {% if user.is_authenticated %}
             {# Authenticated User: Profile Link - Ensure 'users:profile' exists or change URL #}
-            <a href="#"
+            <a href="{% url 'users:profile' %}"
                class="header-action-button"
                aria-label="{% trans 'View Profile' %}"> {# Placeholder href #}
               <i class="fas fa-user"></i>
